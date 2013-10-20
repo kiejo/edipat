@@ -1,50 +1,59 @@
 var builtin_arithmetics = [ '+', '-', '*', '/', '%', '==', '!=', '>', '>=', '<', '<=' ];
 
 function comp_list(els) {
-	var op = els[0].name;
+	if (els[0].type == 'Atom') {
+		var op = els[0].name;
 
-	if (op == "def")
-	{
-		return "var " + els[1].name + " = " + compile(els[2])
-	}
-	else if (op == "fn")
-	{
-		var args = _.map(_.initial(_.tail(els)), function(e) { return e.name; });
-		
-		if (_.last(els).type != 'List')
-			throw "compiler error: expected List as functions body.";
+		if (op == "def")
+		{
+			return "var " + els[1].name + " = " + compile(els[2])
+		}
+		else if (op == "fn")
+		{
+			var args = _.map(_.initial(_.tail(els)), function(e) { return e.name; });
+			
+			if (_.last(els).type != 'List')
+				throw "compiler error: expected List as functions body.";
 
-		var fn_exprs = _.last(els).elements;
-		if (fn_exprs[0].type != 'List') { //only a single statement
-			fn_exprs = [ _.last(els) ];
+			var fn_exprs = _.last(els).elements;
+			if (fn_exprs[0].type != 'List') { //only a single statement
+				fn_exprs = [ _.last(els) ];
+			}
+
+			var fn_stmts = _.map(_.initial(fn_exprs), compile);
+
+			return "function(" + args.join(", ") + ") { \n" + fn_stmts.join("\n") + "\nreturn " + compile(_.last(fn_exprs)) + "; \n}";
+		}
+		else if (builtin_arithmetics.indexOf(op) > -1)
+		{
+			return "(" + compile(els[1]) + " " + op + " " + compile(els[2]) + ")";
+		}
+		else if (op == "if")
+		{
+			return "(function() { " + 
+			       		"if (" + compile(els[1]) + ") { " +
+			       			"return " + compile(els[2]) + ";" +
+			       		"} else { " +
+			       			"return " + compile(els[3]) + ";" + 
+			       		"}" +
+			       	"})()"
+		}
+		else if (op.indexOf('.') == 0)
+		{
+			if (els.length == 1) {
+				return "(function(a) { return a" + op + ";})"
+			} else {
+				xreturn compile(els[1]) + op;
+			}
+			
 		}
 
-		var fn_stmts = _.map(_.initial(fn_exprs), compile);
+	} else if (els[0].type != 'List') {
+		throw "expected atom or list. Got " + els[0].type + " instead.";
+	}
 
-		return "function(" + args.join(", ") + ") { \n" + fn_stmts.join("\n") + "\nreturn " + compile(_.last(fn_exprs)) + "; \n}";
-	}
-	else if (builtin_arithmetics.indexOf(op) > -1)
-	{
-		return "(" + compile(els[1]) + " " + op + " " + compile(els[2]) + ")";
-	}
-	else if (op == "if")
-	{
-		return "(function() { " + 
-		       		"if (" + compile(els[1]) + ") { " +
-		       			"return " + compile(els[2]) + ";" +
-		       		"} else { " +
-		       			"return " + compile(els[3]) + ";" + 
-		       		"}" +
-		       	"})()"
-	}
-	else if (op.indexOf('.') == 0)
-	{
-		return compile(els[1]) + op;
-	}
-	else
-	{
-		return op + "(" + _.map(_.tail(els), compile).join(", ") + ")";
-	}
+	//treat as function call
+	return compile(els[0]) + "(" + _.map(_.tail(els), compile).join(", ") + ")";
 }
 
 function compile(expr) {
