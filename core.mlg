@@ -1,0 +1,12 @@
+(defn cons x xs (.concat [x] xs))
+
+(defn head xs (nth 0 xs))
+
+(defn tail xs (.slice xs 1))
+
+(defn map f xs
+	(if (== (:length xs) 0)
+		[]
+		(cons (f (head xs)) (map f (tail xs)))))
+
+(map (fn a (* a a)) [1 2 3 4 5])

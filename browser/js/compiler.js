@@ -1,5 +1,21 @@
 var builtin_arithmetics = [ '+', '-', '*', '/', '%', '==', '!=', '>', '>=', '<', '<=' ];
 
+function comp_function(els, name) {
+	var args = _.map(_.initial(els), function(e) { return e.name; });
+			
+	if (_.last(els).type != 'List')
+		throw "compiler error: expected List as functions body.";
+
+	var fn_exprs = _.last(els).elements;
+	if (fn_exprs[0].type != 'List') { //only a single statement
+		fn_exprs = [ _.last(els) ];
+	}
+
+	var fn_stmts = _.map(_.initial(fn_exprs), compile);
+
+	return "function " + name + "(" + args.join(", ") + ") { \n" + fn_stmts.join("\n") + "\nreturn " + compile(_.last(fn_exprs)) + "; \n}";
+}
+
 function comp_list(els) {
 	if (els[0].type == 'Atom') {
 		var op = els[0].name;
@@ -10,19 +26,11 @@ function comp_list(els) {
 		}
 		else if (op == "fn")
 		{
-			var args = _.map(_.initial(_.tail(els)), function(e) { return e.name; });
-			
-			if (_.last(els).type != 'List')
-				throw "compiler error: expected List as functions body.";
-
-			var fn_exprs = _.last(els).elements;
-			if (fn_exprs[0].type != 'List') { //only a single statement
-				fn_exprs = [ _.last(els) ];
-			}
-
-			var fn_stmts = _.map(_.initial(fn_exprs), compile);
-
-			return "function(" + args.join(", ") + ") { \n" + fn_stmts.join("\n") + "\nreturn " + compile(_.last(fn_exprs)) + "; \n}";
+			return comp_function(_.tail(els), "");
+		}
+		else if (op == "defn")
+		{
+			return comp_function(_.tail(_.tail(els)), compile(els[1]));	
 		}
 		else if (builtin_arithmetics.indexOf(op) > -1)
 		{
