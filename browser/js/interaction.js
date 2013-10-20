@@ -8,12 +8,12 @@ $(document).ready(function() {
 			var parsed = parser.parse($("#source").val());
 			$("#parsed").text(jsDump.parse(parsed));
 
-			var compiled = compile(parsed);
-			$("#compiled").text(compiled);
-
 		} catch (e) {
 			$("#parsed").text(buildErrorMessage(e));
 		}
+
+		var compiled = compile(parsed);
+		$("#compiled").text(compiled);
 	}
 	
 	function buildErrorMessage(e) {

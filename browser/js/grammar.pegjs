@@ -56,7 +56,7 @@ o_pair
 	= _ a:atom ":" _ s:sexp _ { return { key: a.name, value: s } }
 
 object
-  = _ "{" p:o_pair* "}" _ { return { type: 'Object', value: p }}
+  = _ "{" p:o_pair* "}" _ { return { type: 'Object', elements: p }}
 
 
 _ = [\n, \t, ]*
