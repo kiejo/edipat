@@ -1,0 +1,44 @@
+<!doctype html>
+
+<html>
+
+  <head>
+    <title>mylang 0.1</title>
+    <meta charset="utf-8" />
+
+    <link rel="stylesheet" href="css/style.css">
+
+    <script src="js/vendor/jquery-2.0.3.js"></script>
+    <script src="js/vendor/jsDump-1.0.0.js"></script>
+    <script src="js/vendor/peg-0.7.0.js"></script>
+    <script src="js/compiler.js"></script>
+    <script src="js/interaction.js"></script>
+
+  </head>
+
+  <body>
+  	<div id="container">
+	  	<div id="grammar-wrapper" class="codebox">
+	  		Grammar
+	  		<textarea class="code" id="grammar"></textarea>
+	  	</div>
+	  	<div id="source-wrapper" class="codebox">
+	  		Source
+	  		<textarea class="code" id="source"></textarea>
+	  	</div>
+	  	<div id="parsed-wrapper" class="codebox">
+	  		Parsed
+	  		<textarea class="code" id="parsed"></textarea>
+	  	</div>
+	  	<div id="compiled-wrapper" class="codebox">
+	  		Compiled
+	  		<textarea class="code" id="compiled"></textarea>
+	  	</div>
+  	</div>
+
+  	<div class="clear"/>
+
+  	<button id="compile">Compile</button>
+  </body>
+
+</html>
