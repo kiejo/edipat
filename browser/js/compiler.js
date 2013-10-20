@@ -25,7 +25,7 @@ function comp_list(els) {
 	}
 	else if (builtin_arithmetics.indexOf(op) > -1)
 	{
-		return compile(els[1]) + " " + op + " " + compile(els[2]);
+		return "(" + compile(els[1]) + " " + op + " " + compile(els[2]) + ")";
 	}
 	else if (op == "if")
 	{
@@ -37,6 +37,10 @@ function comp_list(els) {
 		       		"}" +
 		       	"})()"
 	}
+	else if (op.indexOf('.') == 0)
+	{
+		return compile(els[1]) + op;
+	}
 	else
 	{
 		return op + "(" + _.map(_.tail(els), compile).join(", ") + ")";
@@ -46,7 +50,7 @@ function comp_list(els) {
 function compile(expr) {
 	switch(expr.type) {
 		case 'Program':
-			return _.map(expr.body, compile).join(";\n")
+			return _.map(expr.body, compile).join(";\n") + ";"
 		case 'List':
 			return comp_list(expr.elements);
 		case 'Number':
