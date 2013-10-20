@@ -38,14 +38,21 @@ function comp_list(els) {
 			       		"}" +
 			       	"})()"
 		}
-		else if (op.indexOf('.') == 0)
+		else if (op.indexOf(':') == 0) //attribute accessor
 		{
 			if (els.length == 1) {
-				return "(function(a) { return a" + op + ";})"
+				return "(function(a) { return a." + op.substr(1) + ";})"
 			} else {
-				xreturn compile(els[1]) + op;
+				return compile(els[1]) + "." + op.substr(1);
 			}
 			
+		}
+		else if (op.indexOf('.') == 0) //method invocation on object
+		{
+			return compile(els[1]) + "." + op.substr(1) + "(" + _.map(_.drop(els, 2), compile).join(", ") + ")";
+			
+		} else if (op == "nth") {
+			return compile(els[2]) + "[" + compile(els[1]) + "]";
 		}
 
 	} else if (els[0].type != 'List') {

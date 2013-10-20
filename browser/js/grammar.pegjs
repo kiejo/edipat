@@ -44,7 +44,7 @@ comment
 	= "//" c:(!'\n' .)* { return {type: 'Comment', value: makeStr(c) }}
 
 atom
-  = c:[-+/\*_<>=a-zA-Z\.!]+ _ { return {type: 'Atom', name: c.join("")};}
+  = c:[-+/\*_<>=a-zA-Z\.:!]+ _ { return {type: 'Atom', name: c.join("")};}
 
 list
   = _ "(" _ s:sexp* _ ")" _ { return {type: 'List', elements: s};}
