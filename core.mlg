@@ -1,12 +1,26 @@
 (defn cons x xs (.concat [x] xs))
 
+(defn empty xs (== (:length xs) 0))
+
 (defn head xs (nth 0 xs))
 
 (defn tail xs (.slice xs 1))
 
+(defn each f xs
+	(if (empty xs)
+		undefined
+		((f (head xs))
+		 (each f (tail xs)))))
+
 (defn map f xs
-	(if (== (:length xs) 0)
+	(if (empty xs)
 		[]
 		(cons (f (head xs)) (map f (tail xs)))))
 
-(map (fn a (* a a)) [1 2 3 4 5])
+(defn foldl acc f xs
+	(if (empty xs)
+		acc
+		(foldl (f acc (head xs)) f (tail xs))))
+
+(defn sum xs
+	(foldl 0 + xs))

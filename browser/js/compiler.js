@@ -1,4 +1,4 @@
-var builtin_arithmetics = [ '+', '-', '*', '/', '%', '==', '!=', '>', '>=', '<', '<=' ];
+var builtin_bin_ops = [ '+', '-', '*', '/', '%', '==', '!=', '>', '>=', '<', '<=' ];
 
 function comp_function(els, name) {
 	var args = _.map(_.initial(els), function(e) { return e.name; });
@@ -14,6 +14,16 @@ function comp_function(els, name) {
 	var fn_stmts = _.map(_.initial(fn_exprs), compile);
 
 	return "function " + name + "(" + args.join(", ") + ") { \n" + fn_stmts.join("\n") + "\nreturn " + compile(_.last(fn_exprs)) + "; \n}";
+}
+
+function comp_if(els) {
+	return "(function() { \n" + 
+			       		"if (" + compile(els[1]) + ") { \n" +
+			       			"return " + compile(els[2]) + ";" +
+			       		"} else { \n" +
+			       			"return " + compile(els[3]) + ";" +
+			       		"}" +
+			       	"})()"
 }
 
 function comp_list(els) {
@@ -32,19 +42,9 @@ function comp_list(els) {
 		{
 			return comp_function(_.tail(_.tail(els)), compile(els[1]));	
 		}
-		else if (builtin_arithmetics.indexOf(op) > -1)
-		{
-			return "(" + compile(els[1]) + " " + op + " " + compile(els[2]) + ")";
-		}
 		else if (op == "if")
 		{
-			return "(function() { " + 
-			       		"if (" + compile(els[1]) + ") { " +
-			       			"return " + compile(els[2]) + ";" +
-			       		"} else { " +
-			       			"return " + compile(els[3]) + ";" + 
-			       		"}" +
-			       	"})()"
+			return comp_if(els);
 		}
 		else if (op.indexOf(':') == 0) //attribute accessor
 		{
@@ -61,14 +61,18 @@ function comp_list(els) {
 			
 		} else if (op == "nth") {
 			return compile(els[2]) + "[" + compile(els[1]) + "]";
+		} else { //treat as function call
+			return compile(els[0]) + "(" + _.map(_.tail(els), compile).join(", ") + ")";
 		}
 
-	} else if (els[0].type != 'List') {
-		throw "expected atom or list. Got " + els[0].type + " instead.";
+	} else if (els[0].type == 'List') {
+		//treat as sequential operations
+		return "(function() { \n" + 
+			       			_.map(_.initial(els), compile).join(";\n") + ";\n" + "return " + compile(_.last(els)) + ";\n" +
+			       	"})()"
 	}
 
-	//treat as function call
-	return compile(els[0]) + "(" + _.map(_.tail(els), compile).join(", ") + ")";
+	throw "expected atom or list. Got " + els[0].type + " instead.";
 }
 
 function compile(expr) {
@@ -82,7 +86,11 @@ function compile(expr) {
 		case 'String':
 			return '"' + expr.value + '"';
 		case 'Atom':
-			return expr.name;
+			if (builtin_bin_ops.indexOf(expr.name) > -1) {
+				return "(" + "function(a,b) { return a " + expr.name + " b; })";
+			} else {
+				return expr.name;
+			}
 		case 'Comment':
 			return "";
 		case 'Array':
