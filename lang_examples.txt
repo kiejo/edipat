@@ -1,4 +1,4 @@
-mylang 0.1
+//mylang 0.1
 
 // data types
 //Object: {a: "hello" b: 44}
@@ -29,7 +29,7 @@ mylang 0.1
 //pattern matching
 (match [1 2 3 4 5 6]
 	([1 2 a]           a)
-	([_ _ 3 _ .. rest] (tail rest))
+	([_ _ 3 _ : rest] (tail rest))
 	([1 a _ b _]      (lst a b)))
 
 (match {a: "hello" b: 10}
@@ -43,7 +43,7 @@ mylang 0.1
 
 (def my_sum
 	([]      0)
-	([x .. xs] (x + (my_sum xs))))
+	([x : xs] (x + (my_sum xs))))
 
 //macros
 (macro case args

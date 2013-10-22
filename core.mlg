@@ -1,8 +1,10 @@
 (defn cons x xs (.concat [x] xs))
 
-(defn empty xs (== (:length xs) 0))
+(defn empty xs (== (#length xs) 0))
 
 (defn head xs (nth 0 xs))
+
+(defn last xs (nth (- (#length xs) 1) xs))
 
 (defn tail xs (.slice xs 1))
 
@@ -24,3 +26,6 @@
 
 (defn sum xs
 	(foldl 0 + xs))
+
+(defn str xs
+	(foldl "" + xs))
