@@ -9,19 +9,16 @@ String.prototype.repeat = function( num )
 function comp_function(els, name) {
 	var args = _.map(_.initial(els), function(e) { return e.name; });
 
-
-			
-	if (_.last(els).type != 'List')
-		throw "compiler error: expected List as functions body.";
-
-	var fn_exprs = _.last(els).elements;
-	if (fn_exprs[0].type != 'List') { //only a single statement
+	var fn_exprs;
+	if (_.last(els).type != 'List' || _.last(els).elements[0].type != 'List') {
 		fn_exprs = [ _.last(els) ];
+	} else {
+		fn_exprs = _.last(els).elements;
 	}
 
 	var fn_stmts = _.map(_.initial(fn_exprs), compile);
 
-	return "function " + name + "(" + args.join(", ") + ") { \n" + fn_stmts.join("\n") + "\nreturn " + compile(_.last(fn_exprs)) + "; \n}";
+	return "function " + name + "(" + args.join(", ") + ") { \n" + fn_stmts.join("\n") + "\nreturn " + compile(_.last(fn_exprs)) + ";\n}";
 }
 
 function comp_if(els) {
