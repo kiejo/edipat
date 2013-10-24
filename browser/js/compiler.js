@@ -89,15 +89,19 @@ function gen_patt_info(patt, el, el_accessor) {
 		case "String": return [{type: 'Cond', cond: compile(patt) + " == " + comp_el}];
 		case "Array":
 			var res = [{type: 'Cond', cond: 'get_type(' + comp_el + ") == 'Array'"}];
-			for (var i = 0; i < patt.elements.length; i++) {
-				if (patt.elements[i].type == 'Atom' && patt.elements[i].name == '&') {  //bind the rest of the array to the next element in the pattern
-					res.push({type: 'Decl', name: patt.elements[i + 1].name, value: comp_el + '.splice(' + i + ')'})
-					break;
-				}
+			if (patt.elements.length < 1) {
+				res.push({type: 'Cond', cond: "0 == " + comp_el + ".length"});
+			} else {
+				for (var i = 0; i < patt.elements.length; i++) {
+					if (patt.elements[i].type == 'Atom' && patt.elements[i].name == '&') {  //bind the rest of the array to the next element in the pattern
+						res.push({type: 'Decl', name: patt.elements[i + 1].name, value: comp_el + '.splice(' + i + ')'})
+						break;
+					}
 
-				res.push(gen_patt_info(patt.elements[i], el, el_accessor + '[' + i + ']'));
-			};
-
+					res.push(gen_patt_info(patt.elements[i], el, el_accessor + '[' + i + ']'));
+				};
+			}
+			
 			return _.flatten(res);
 		case 'Object':
 			var res = [{type: 'Cond', cond: 'get_type(' + comp_el + ") == 'Object'"}];
