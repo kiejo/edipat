@@ -107,6 +107,8 @@ function gen_patt_info(patt, el, el_accessor) {
 			};
 
 			return _.flatten(res);
+
+		default: throw "can't match against type " + patt.type;
 	}
 }
 
