@@ -1,0 +1,23 @@
+
+(defn update_ast ast keycode (match keycode 
+	(65 (gen_def_var))
+	))
+
+(defn gen_def_var 
+	{ t: "def_var" name: { t: "atom" name: "name" active: "t" } body: {} })
+
+
+(defn update_view ast
+	(.text ($ "ast") (.parse jsDump ast)))
+
+
+(.ready ($ document) (fn (
+
+	(def ast {})
+
+	(.keyup ($ "#input") (fn e (
+		(set ast (update_ast ast (#which e)))
+		(update_view ast)
+		)))
+
+)))
