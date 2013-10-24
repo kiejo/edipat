@@ -121,6 +121,10 @@ function comp_list(els) {
 		{
 			return "var " + els[1].name + " = " + compile(els[2])
 		}
+		if (op == "set")
+		{
+			return els[1].name + " = " + compile(els[2])
+		}
 		else if (op == "fn")
 		{
 			return comp_function(_.tail(els), "");
