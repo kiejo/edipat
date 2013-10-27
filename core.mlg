@@ -1,5 +1,7 @@
 (defn cons x xs (.concat [x] xs))
 
+(defn concat xs ys (.concat xs ys))
+
 (defn empty xs (== (#length xs) 0))
 
 (defn head xs (nth 0 xs))
@@ -31,3 +33,6 @@
 
 (defn str xs
 	(foldl "" + xs))
+
+(defn flatten xs
+	(foldl [] concat xs))

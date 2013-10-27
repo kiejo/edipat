@@ -2,6 +2,10 @@ function cons(x, xs) {
 
 return [x].concat(xs);
 };
+function concat(xs, ys) { 
+
+return xs.concat(ys);
+};
 function empty(xs) { 
 
 return (function(a,b) { return a == b; })(xs.length, 0);
@@ -53,4 +57,8 @@ return foldl(0, (function(a,b) { return a + b; }), xs);
 function str(xs) { 
 
 return foldl("", (function(a,b) { return a + b; }), xs);
+};
+function flatten(xs) { 
+
+return foldl([], concat, xs);
 };
