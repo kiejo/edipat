@@ -1,20 +1,16 @@
-
-(defn update_ast ast keycode (match keycode 
-	
-	(kc (insert_ast ast kc))
-	))
+(defn gen_atom_name { t: "atom" name: "" active: "t" })
 
 (defn gen_arg
-	{ t: "arg" expr: { } })
+	{ t: "arg" expr: {} })
 
 (defn gen_def_var 
-	{ t: "def_var" name: { t: "atom" name: "" active: "t" } body: {} })
+	{ t: "def_var" name: (gen_atom_name) body: {} })
 
 (defn gen_def_fn 
-	{ t: "def_fn" name: { t: "atom" name: "" active: "t" } args: [] body: {} })
+	{ t: "def_fn" name: (gen_atom_name) args: [] body: {} })
 
 (defn gen_call_fn
-	{ t: "call_fn" name: { t: "atom" name: "" active: "t" } args: [ (gen_arg) ] active: "f" })
+	{ t: "call_fn" name: (gen_atom_name) args: [ (gen_arg) ] active: "f" })
 
 (defn gen_body t (match t
 	("def_var" { t: "" active: "t"})
@@ -36,11 +32,13 @@
 				({ args: [ first & rest ] } { args: (cons (activate first) rest) })))
 
 			("call_fn" (match ast
-				({ args: [ first & rest ] } { args: (cons (activate first) rest) }))))))
+				({ args: [ first & rest ] } { args: (cons (activate first) rest) })))
+
+			)))
 
 
 
-(defn insert_ast ast keycode
+(defn update_ast ast keycode
 	(match ast
 
 		({ t: "program" active: "t" els: elements }
@@ -50,7 +48,7 @@
 		({ t: "program" els: elements }
 			(match keycode
 				
-				(_ (merge ast {active: "f" els: (map (fn el (insert_ast el keycode)) elements)}))))
+				(_ (merge ast {active: "f" els: (map (fn el (update_ast el keycode)) elements)}))))
 
 
 
@@ -62,6 +60,14 @@
 		 	(32 (merge ast (gen_space type ast)))
 		 	(kc (merge ast { name: { name: (+ name (to_char kc)) } }))))
 
+		({ t: "arg" expr: { t: "atom" name: name active: "t" } }
+		 (match keycode
+		 	(8 (if (== (#length name) 1)
+		 		   []
+		 		   (merge ast { expr: { name: (init name) } })))
+		 	(32 [(merge ast { expr: { active: "f" } }), (activate (gen_arg))])
+		 	(kc (merge ast { expr: { name: (+ name (to_char kc)) } }))))
+
 
 		({ t: type body: { active: "t" } }
 		 (match keycode
@@ -69,16 +75,25 @@
 		 	))
 
 		({ t: type body: body }
-			(merge ast { body: (insert_ast body keycode) }))
+			(merge ast { body: (update_ast body keycode) }))
 
 
 		({ t: "call_fn" args: args }
-			(merge ast { args: (map process_arg args) }))
+			(merge ast { args: (flatten (map (fn arg (process_arg arg keycode)) args)) }))
 
 		(_ ast)))
 
 
-(defn process_arg arg)
+(defn process_arg arg keycode (match arg
+	
+	({ t: "arg" active: "t" }
+	 (match keycode 
+		(65 (merge (deactivate arg) { expr: (gen_atom_name) }))
+		))
+
+	({ t: "arg" expr: { t: _ } } (update_ast arg keycode))
+
+	))
 
 (defn update_view ast
 	(.text ($ "#ast") (.parse jsDump ast)))

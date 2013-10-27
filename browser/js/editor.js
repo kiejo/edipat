@@ -1,26 +1,22 @@
-function update_ast(ast, keycode) { 
+function gen_atom_name() { 
 
-return (function() { 
-	var el_to_match = keycode;
-	var kc = el_to_match;
-	return insert_ast(ast, kc);
-})();
+return {t: "atom", name: "", active: "t"};
 };
 function gen_arg() { 
 
-return {t: "arg", name: {t: "atom", name: ""}};
+return {t: "arg", expr: {}};
 };
 function gen_def_var() { 
 
-return {t: "def_var", name: {t: "atom", name: "", active: "t"}, body: {}};
+return {t: "def_var", name: gen_atom_name(), body: {}};
 };
 function gen_def_fn() { 
 
-return {t: "def_fn", name: {t: "atom", name: "", active: "t"}, args: [], body: {}};
+return {t: "def_fn", name: gen_atom_name(), args: [], body: {}};
 };
 function gen_call_fn() { 
 
-return {t: "call_fn", name: {t: "atom", name: "", active: "t"}, args: [gen_arg()], active: "f"};
+return {t: "call_fn", name: gen_atom_name(), args: [gen_arg()], active: "f"};
 };
 function gen_body(t) { 
 
@@ -89,7 +85,7 @@ return merge(merge(ast, {name: {active: "f"}}), (function() {
 
 	}})());
 };
-function insert_ast(ast, keycode) { 
+function update_ast(ast, keycode) { 
 
 return (function() { 
 	var el_to_match = ast;
@@ -123,7 +119,7 @@ return (function() {
 	var el_to_match = keycode;
 	return merge(ast, {active: "f", els: map(function (el) { 
 
-return insert_ast(el, keycode);
+return update_ast(el, keycode);
 }, elements)});
 })();
 
@@ -174,6 +170,47 @@ return merge(ast, {name: {name: init(name)}});}})();
 
 	if (get_type(el_to_match) == 'Object') {
 		if ('t' in el_to_match) {
+			if ("arg" == el_to_match.t) {
+				if ('expr' in el_to_match) {
+					if (get_type(el_to_match.expr) == 'Object') {
+						if ('t' in el_to_match.expr) {
+							if ("atom" == el_to_match.expr.t) {
+								if ('name' in el_to_match.expr) {
+									var name = el_to_match.expr.name;
+									if ('active' in el_to_match.expr) {
+										if ("t" == el_to_match.expr.active) {
+											return (function() { 
+	var el_to_match = keycode;
+	if (8 == el_to_match) {
+		return (function() { 
+if ((function(a,b) { return a == b; })(name.length, 1)) { 
+return [];} else { 
+return merge(ast, {expr: {name: init(name)}});}})();
+
+	}
+
+	if (32 == el_to_match) {
+		return [merge(ast, {expr: {active: "f"}}), activate(gen_arg())];
+
+	}
+
+	var kc = el_to_match;
+	return merge(ast, {expr: {name: (function(a,b) { return a + b; })(name, to_char(kc))}});
+})();
+
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
 			var type = el_to_match.t;
 			if ('body' in el_to_match) {
 				if (get_type(el_to_match.body) == 'Object') {
@@ -198,7 +235,7 @@ return merge(ast, {name: {name: init(name)}});}})();
 			var type = el_to_match.t;
 			if ('body' in el_to_match) {
 				var body = el_to_match.body;
-				return merge(ast, {body: insert_ast(body, keycode)});
+				return merge(ast, {body: update_ast(body, keycode)});
 
 			}
 		}
@@ -209,18 +246,10 @@ return merge(ast, {name: {name: init(name)}});}})();
 			if ("call_fn" == el_to_match.t) {
 				if ('args' in el_to_match) {
 					var args = el_to_match.args;
-					return merge(ast, {args: map(function (el) { 
+					return merge(ast, {args: flatten(map(function (arg) { 
 
-return (function() { 
-if ((function(a,b) { return a && b; })((function(a,b) { return a == b; })(el.active, "t"), (function(a,b) { return a == b; })(el.t, undefined))) { 
-return (function() { 
-	var el_to_match = keycode;
-	if (65 == el_to_match) {
-		return gen_arg();
-
-	}})();} else { 
-return insert_ast(ast, keycode);}})();
-}, args)});
+return process_arg(arg, keycode);
+}, args))});
 
 				}
 			}
@@ -229,6 +258,49 @@ return insert_ast(ast, keycode);}})();
 
 	return ast;
 })();
+};
+function process_arg(arg, keycode) { 
+
+return (function() { 
+	var el_to_match = arg;
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
+			if ("arg" == el_to_match.t) {
+				if ('active' in el_to_match) {
+					if ("t" == el_to_match.active) {
+						return (function() { 
+	var el_to_match = keycode;
+	if (65 == el_to_match) {
+		return merge(deactivate(arg), {expr: gen_atom_name()});
+
+	}
+
+	if (32 == el_to_match) {
+		return [deactivate(arg), activate(gen_arg())];
+
+	}})();
+
+					}
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
+			if ("arg" == el_to_match.t) {
+				if ('expr' in el_to_match) {
+					if (get_type(el_to_match.expr) == 'Object') {
+						if ('t' in el_to_match.expr) {
+							var type = el_to_match.expr.t;
+							return update_ast(arg, keycode);
+
+						}
+					}
+				}
+			}
+		}
+	}})();
 };
 function update_view(ast) { 
 
