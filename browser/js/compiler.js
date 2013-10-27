@@ -1,4 +1,4 @@
-var builtin_bin_ops = [ '+', '-', '*', '/', '%', '==', '!=', '>', '>=', '<', '<=' ];
+var builtin_bin_ops = [ '+', '-', '*', '/', '%', '==', '!=', '>', '>=', '<', '<=', '&&', '||' ];
 
 
 String.prototype.repeat = function( num )
