@@ -8,6 +8,8 @@
 
 (defn tail xs (.slice xs 1))
 
+(defn init xs (.slice xs 0 -1))
+
 (defn each f xs
 	(if (empty xs)
 		undefined
