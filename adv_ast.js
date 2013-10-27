@@ -44,7 +44,7 @@ num
 			{
 				t: 'call_fn'
 				name: { t: 'atom' name: 'empty' }
-				args: { t: 'atom' name: 'xs' }
+				args: [ { t: 'atom' name: 'xs' } ]
 			},
 			{ t: 'arr', els: [] }
 			{
@@ -84,3 +84,13 @@ num
 		]
 	}
 }
+
+
+
+atom space key:
+def_var name => gen body
+def_fn  name => gen args
+def_fn  args => add arg
+def_fna args => add arg
+call_fn name => gen args
+call_fn args => add arg
