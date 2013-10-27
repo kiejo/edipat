@@ -1,19 +1,93 @@
 
 (defn update_ast ast keycode (match keycode 
-	(65 (gen_def_var))
+	
+	(kc (insert_ast ast kc))
 	))
 
-(defn gen_def_var 
-	{ t: "def_var" name: { t: "atom" name: "name" active: "t" } body: {} })
+(defn gen_arg
+	{ t: "arg" expr: { } })
 
+(defn gen_def_var 
+	{ t: "def_var" name: { t: "atom" name: "" active: "t" } body: {} })
+
+(defn gen_def_fn 
+	{ t: "def_fn" name: { t: "atom" name: "" active: "t" } args: [] body: {} })
+
+(defn gen_call_fn
+	{ t: "call_fn" name: { t: "atom" name: "" active: "t" } args: [ (gen_arg) ] active: "f" })
+
+(defn gen_body t (match t
+	("def_var" { t: "" active: "t"})
+	("call_fn" {})))
+
+(defn to_char keycode (.fromCharCode String keycode))
+
+(defn activate ast (merge ast { active: "t" }))
+
+(defn deactivate ast (merge ast { active: "f" }))
+
+(defn gen_space type ast
+	(merge
+		(merge ast { name: { active: "f" } })
+		(match type
+			("def_var" { body: { active: "t" } })
+			
+			("def_fn"  (match ast
+				({ args: [ first & rest ] } { args: (cons (activate first) rest) })))
+
+			("call_fn" (match ast
+				({ args: [ first & rest ] } { args: (cons (activate first) rest) }))))))
+
+
+
+(defn insert_ast ast keycode
+	(match ast
+
+		({ t: "program" active: "t" els: elements }
+			(match keycode 
+				(65 (merge ast { active: "f" els: (cons (gen_def_var) elements) }))))
+
+		({ t: "program" els: elements }
+			(match keycode
+				
+				(_ (merge ast {active: "f" els: (map (fn el (insert_ast el keycode)) elements)}))))
+
+
+
+		({ t: type name: { t: "atom" name: name active: "t" } }
+		 (match keycode
+		 	(8 (if (== (#length name) 1)
+		 		   {}
+		 		   (merge ast { name: { name: (init name) } })))
+		 	(32 (merge ast (gen_space type ast)))
+		 	(kc (merge ast { name: { name: (+ name (to_char kc)) } }))))
+
+
+		({ t: type body: { active: "t" } }
+		 (match keycode
+		 	(65 (merge ast { body: (gen_call_fn) }))
+		 	))
+
+		({ t: type body: body }
+			(merge ast { body: (insert_ast body keycode) }))
+
+
+		({ t: "call_fn" args: args }
+			(merge ast { args: (map process_arg args) }))
+
+		(_ ast)))
+
+
+(defn process_arg arg)
 
 (defn update_view ast
-	(.text ($ "ast") (.parse jsDump ast)))
+	(.text ($ "#ast") (.parse jsDump ast)))
 
 
 (.ready ($ document) (fn (
 
-	(def ast {})
+	(def ast { t: "program" els: [] active: "t" })
+	(update_view ast)
 
 	(.keyup ($ "#input") (fn e (
 		(set ast (update_ast ast (#which e)))
