@@ -158,9 +158,25 @@ function comp_list(els) {
 		{
 			return compile(els[2]) + "[" + compile(els[1]) + "]";
 		}
-		else //treat as function call
+		else //treat as function call or partial function
 		{
-			return compile(els[0]) + "(" + _.map(_.tail(els), compile).join(", ") + ")";
+			var partial_arg_prefix = '__partial_arg_';
+
+			function compile_arg(arg, i) {
+				return arg.type == 'Atom' && arg.name == '_' ? partial_arg_prefix + i : compile(arg);
+			}
+
+			var compiled_args = _.map(_.tail(els), compile_arg);
+			var compiled_fn_call = compile(els[0]) + "(" + compiled_args.join(", ") + ")";
+
+			var partial_args = _.filter(compiled_args, function(arg) { return (typeof arg == 'string') && arg.indexOf(partial_arg_prefix) == 0; });
+
+			if (partial_args.length == 0) { //generate normal function call
+				return compiled_fn_call;
+			}
+			else { //generate partial function
+				return "(function(" + partial_args.join(", ") + ") { return " + compiled_fn_call + "})";
+			}
 		}
 
 	} else if (els[0].type == 'List') {
