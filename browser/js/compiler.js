@@ -95,7 +95,9 @@ function gen_patt_info(patt, el, el_accessor) {
 						break;
 					}
 
-					res.push(gen_patt_info(patt.elements[i], el, el_accessor + '[' + i + ']'));
+					var new_accessor = el_accessor + '[' + i + ']';
+					res.push({type: 'Cond', cond: "typeof " + comp_el + new_accessor + " != 'undefined'"});
+					res.push(gen_patt_info(patt.elements[i], el, new_accessor));
 				};
 			}
 			
@@ -151,7 +153,10 @@ function comp_list(els) {
 		}
 		else if (op.indexOf('.') == 0) //method invocation on object
 		{
-			return compile(els[1]) + "." + op.substr(1) + "(" + _.map(_.drop(els, 2), compile).join(", ") + ")";
+			var fn_atom = { type: "Atom", name: compile(els[1]) + '.' + op.substr(1) };
+			var fn_call = { type: "List", elements: [fn_atom].concat(_.drop(els, 2)) };
+
+			return compile(fn_call);
 			
 		}
 		else if (op == "nth") //array access
