@@ -91,7 +91,7 @@ function gen_patt_info(patt, el, el_accessor) {
 			} else {
 				for (var i = 0; i < patt.elements.length; i++) {
 					if (patt.elements[i].type == 'Atom' && patt.elements[i].name == '&') {  //bind the rest of the array to the next element in the pattern
-						res.push({type: 'Decl', name: patt.elements[i + 1].name, value: comp_el + '.splice(' + i + ')'})
+						res.push({type: 'Decl', name: patt.elements[i + 1].name, value: comp_el + '.slice(' + i + ')'})
 						break;
 					}
 

@@ -107,7 +107,7 @@
 	(merge node
 		(match node
 			({t: "List" active: "t" els: els}
-				(if (== (any is_active els) "t")
+				(if (any is_active els)
 					{ els: (map (update_node _ kc) els) }
 					(match kc
 						(37 { els: (activate_prev els) })
@@ -127,7 +127,8 @@
 					(c   { t: "Atom" val: c })))
 
 			(_ (match kc
-			 	(38 { active: "f" })))
+			 	(38 { active: "f" })
+			 	(_  {})))
 		)
 	)
 )

@@ -405,7 +405,10 @@ return (function() {
 	if (38 == el_to_match) {
 		return {active: "f"};
 
-	}})();
+	}
+
+	return {};
+})();
 })());
 };
 function gen_new() { 

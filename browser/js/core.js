@@ -68,19 +68,21 @@ return (function() {
 	var el_to_match = xs;
 	if (get_type(el_to_match) == 'Array') {
 		if (0 == el_to_match.length) {
-			return "f";
+			return false;
 
 		}
 	}
 
 	if (get_type(el_to_match) == 'Array') {
-		var x = el_to_match[0];
-		var rest = el_to_match.splice(1);
-		return (function() { 
+		if (typeof el_to_match[0] != 'undefined') {
+			var x = el_to_match[0];
+			var rest = el_to_match.splice(1);
+			return (function() { 
 if (f(x)) { 
-return "t";} else { 
+return true;} else { 
 return any(f, rest);}})();
 
+		}
 	}})();
 };
 function inc(a) { 
@@ -105,4 +107,3 @@ if ((function(a,b) { return a >= b; })(a, b)) {
 return a;} else { 
 return b;}})();
 };
-any((function(__partial_arg_1) { return (function(a,b) { return a == b; })(3, __partial_arg_1)}), [1, 2, 3]);

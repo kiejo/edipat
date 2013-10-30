@@ -38,9 +38,9 @@
 	(foldl [] concat xs))
 
 (defn any f xs (match xs
-	([] "f")
+	([] false)
 	([x & rest] (if (f x)
-				 "t"
+				 true
 				(any f rest)))))
 
 (defn inc a (+ a 1))
