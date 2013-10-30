@@ -1,7 +1,7 @@
 (defn gen_atom_name { t: "atom" name: "" active: "t" })
 
 (defn gen_arg
-	{ t: "arg" expr: {} })
+	{ t: "arg" active: "t" })
 
 (defn gen_def_var 
 	{ t: "def_var" name: (gen_atom_name) body: {} })
@@ -48,7 +48,7 @@
 		({ t: "program" els: elements }
 			(match keycode
 				
-				(_ (merge ast {active: "f" els: (map (fn el (update_ast el keycode)) elements)}))))
+				(_ (merge ast {active: "f" els: (map (update_ast _ keycode) elements)}))))
 
 
 
@@ -79,14 +79,19 @@
 
 
 		({ t: "call_fn" args: args }
-			(merge ast { args: (flatten (map (fn arg (process_arg arg keycode)) args)) }))
+			(merge ast { args: (flatten
+				(match (map (process_arg _ keycode) args)
+					([] [(gen_arg)])
+					(as (if (== (last as) [])
+							(concat (init (init as)) (activate (last (init as))))
+							as)))) }))
 
 		(_ ast)))
 
 
 (defn process_arg arg keycode (match arg
 	
-	({ t: "arg" active: "t" }
+	({ t: "arg" expr: expr }
 	 (match keycode 
 		(65 (merge (deactivate arg) { expr: (gen_atom_name) }))
 		))
@@ -95,6 +100,62 @@
 
 	))
 
+
+//node system
+
+(defn update_node node kc
+	(merge node
+		(match node
+			({t: "List" active: "t" els: els}
+				(if (== (any is_active els) "t")
+					{ els: (map (update_node _ kc) els) }
+					(match kc
+						(37 { els: (activate_prev els) })
+						(39 { els: (activate_next els) })
+						(38 { active: "f" })
+						(40 { els: (activate_first els) })
+						(32 { els: (concat (deactivate_all els) (activate (gen_new))) })
+						(_  {}))))
+
+			({t: "pending" active: "t"}
+				(match (.fromCharCode String kc)
+					("q" { t: "Str"  val: "" })
+					("[" { t: "Arr"  els: [(activate (gen_new))] })
+					("L" { t: "List" els: [(activate (gen_new))] })
+					("{" { t: "Obj"  els: [(activate (gen_new))] })
+					(num { t: "Num"  val: num })
+					(c   { t: "Atom" val: c })))
+
+			(_ (match kc
+			 	(38 { active: "f" })))
+		)
+	)
+)
+
+(defn gen_new { t: "pending" })
+
+(defn is_active el
+	(== (#active el) "t"))
+
+(defn activate_first els (match els
+	([] els
+	([el & rest] (cons (merge el { active: "t" }) rest)))))
+
+(defn deactivate_all els
+	(map (merge _ { active: "f" }) els))
+
+(defn activate_next els (match els
+	([x y & rest] (if (is_active y)
+					  (cons (activate x) (cons (deactivate y) rest))
+					  (cons x (cons y (activate_next rest)))))
+	(_ els)))
+
+(defn activate_prev els (match els
+	([x y & rest] (if (is_active x)
+					  (cons (deactivate x) (cons (activate y) rest))
+					  (cons x (cons y (activate_next rest)))))
+	(_ els)))
+
 (defn update_view ast
 	(.text ($ "#ast") (.parse jsDump ast)))
 
@@ -102,11 +163,14 @@
 (.ready ($ document) (fn (
 
 	(def ast { t: "program" els: [] active: "t" })
-	(update_view ast)
+
+	(def nodes { t: "List" els: [(activate (gen_new))] active: "t" })
+
+	(update_view nodes)
 
 	(.keyup ($ "#input") (fn e (
-		(set ast (update_ast ast (#which e)))
-		(update_view ast)
+		(set nodes (update_node nodes (#which e)))
+		(update_view nodes)
 		)))
 
 )))

@@ -4,7 +4,7 @@ return {t: "atom", name: "", active: "t"};
 };
 function gen_arg() { 
 
-return {t: "arg", expr: {}};
+return {t: "arg", active: "t"};
 };
 function gen_def_var() { 
 
@@ -59,10 +59,12 @@ return merge(merge(ast, {name: {active: "f"}}), (function() {
 	if (get_type(el_to_match) == 'Object') {
 		if ('args' in el_to_match) {
 			if (get_type(el_to_match.args) == 'Array') {
-				var first = el_to_match.args[0];
-				var rest = el_to_match.args.splice(1);
-				return {args: cons(activate(first), rest)};
+				if (typeof el_to_match.args.args[0] != 'undefined') {
+					var first = el_to_match.args[0];
+					var rest = el_to_match.args.splice(1);
+					return {args: cons(activate(first), rest)};
 
+				}
 			}
 		}
 	}})();
@@ -75,10 +77,12 @@ return merge(merge(ast, {name: {active: "f"}}), (function() {
 	if (get_type(el_to_match) == 'Object') {
 		if ('args' in el_to_match) {
 			if (get_type(el_to_match.args) == 'Array') {
-				var first = el_to_match.args[0];
-				var rest = el_to_match.args.splice(1);
-				return {args: cons(activate(first), rest)};
+				if (typeof el_to_match.args.args[0] != 'undefined') {
+					var first = el_to_match.args[0];
+					var rest = el_to_match.args.splice(1);
+					return {args: cons(activate(first), rest)};
 
+				}
 			}
 		}
 	}})();
@@ -117,10 +121,7 @@ return (function() {
 					var elements = el_to_match.els;
 					return (function() { 
 	var el_to_match = keycode;
-	return merge(ast, {active: "f", els: map(function (el) { 
-
-return update_ast(el, keycode);
-}, elements)});
+	return merge(ast, {active: "f", els: map((function(__partial_arg_0) { return update_ast(__partial_arg_0, keycode)}), elements)});
 })();
 
 				}
@@ -246,10 +247,21 @@ return merge(ast, {expr: {name: init(name)}});}})();
 			if ("call_fn" == el_to_match.t) {
 				if ('args' in el_to_match) {
 					var args = el_to_match.args;
-					return merge(ast, {args: flatten(map(function (arg) { 
+					return merge(ast, {args: flatten((function() { 
+	var el_to_match = map((function(__partial_arg_0) { return process_arg(__partial_arg_0, keycode)}), args);
+	if (get_type(el_to_match) == 'Array') {
+		if (0 == el_to_match.length) {
+			return [gen_arg()];
 
-return process_arg(arg, keycode);
-}, args))});
+		}
+	}
+
+	var as = el_to_match;
+	return (function() { 
+if ((function(a,b) { return a == b; })(last(as), [])) { 
+return concat(init(init(as)), activate(last(init(as))));} else { 
+return as;}})();
+})())});
 
 				}
 			}
@@ -266,21 +278,15 @@ return (function() {
 	if (get_type(el_to_match) == 'Object') {
 		if ('t' in el_to_match) {
 			if ("arg" == el_to_match.t) {
-				if ('active' in el_to_match) {
-					if ("t" == el_to_match.active) {
-						return (function() { 
+				if ('expr' in el_to_match) {
+					var expr = el_to_match.expr;
+					return (function() { 
 	var el_to_match = keycode;
 	if (65 == el_to_match) {
 		return merge(deactivate(arg), {expr: gen_atom_name()});
 
-	}
-
-	if (32 == el_to_match) {
-		return [deactivate(arg), activate(gen_arg())];
-
 	}})();
 
-					}
 				}
 			}
 		}
@@ -292,7 +298,6 @@ return (function() {
 				if ('expr' in el_to_match) {
 					if (get_type(el_to_match.expr) == 'Object') {
 						if ('t' in el_to_match.expr) {
-							var type = el_to_match.expr.t;
 							return update_ast(arg, keycode);
 
 						}
@@ -302,15 +307,184 @@ return (function() {
 		}
 	}})();
 };
+;
+function update_node(node, kc) { 
+
+return merge(node, (function() { 
+	var el_to_match = node;
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
+			if ("List" == el_to_match.t) {
+				if ('active' in el_to_match) {
+					if ("t" == el_to_match.active) {
+						if ('els' in el_to_match) {
+							var els = el_to_match.els;
+							return (function() { 
+if ((function(a,b) { return a == b; })(any(is_active, els), "t")) { 
+return {els: map((function(__partial_arg_0) { return update_node(__partial_arg_0, kc)}), els)};} else { 
+return (function() { 
+	var el_to_match = kc;
+	if (37 == el_to_match) {
+		return {els: activate_prev(els)};
+
+	}
+
+	if (39 == el_to_match) {
+		return {els: activate_next(els)};
+
+	}
+
+	if (38 == el_to_match) {
+		return {active: "f"};
+
+	}
+
+	if (40 == el_to_match) {
+		return {els: activate_first(els)};
+
+	}
+
+	if (32 == el_to_match) {
+		return {els: concat(deactivate_all(els), activate(gen_new()))};
+
+	}
+
+	return {};
+})();}})();
+
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
+			if ("pending" == el_to_match.t) {
+				if ('active' in el_to_match) {
+					if ("t" == el_to_match.active) {
+						return (function() { 
+	var el_to_match = String.fromCharCode(kc);
+	if ("q" == el_to_match) {
+		return {t: "Str", val: ""};
+
+	}
+
+	if ("[" == el_to_match) {
+		return {t: "Arr", els: [activate(gen_new())]};
+
+	}
+
+	if ("L" == el_to_match) {
+		return {t: "List", els: [activate(gen_new())]};
+
+	}
+
+	if ("{" == el_to_match) {
+		return {t: "Obj", els: [activate(gen_new())]};
+
+	}
+
+	var num = el_to_match;
+	return {t: "Num", val: num};
+
+
+	var c = el_to_match;
+	return {t: "Atom", val: c};
+})();
+
+					}
+				}
+			}
+		}
+	}
+
+	return (function() { 
+	var el_to_match = kc;
+	if (38 == el_to_match) {
+		return {active: "f"};
+
+	}})();
+})());
+};
+function gen_new() { 
+
+return {t: "pending"};
+};
+function is_active(el) { 
+
+return (function(a,b) { return a == b; })(el.active, "t");
+};
+function activate_first(els) { 
+
+return (function() { 
+	var el_to_match = els;
+	if (get_type(el_to_match) == 'Array') {
+		if (0 == el_to_match.length) {
+			return els;
+
+		}
+	}})();
+};
+function deactivate_all(els) { 
+
+return map((function(__partial_arg_0) { return merge(__partial_arg_0, {active: "f"})}), els);
+};
+function activate_next(els) { 
+
+return (function() { 
+	var el_to_match = els;
+	if (get_type(el_to_match) == 'Array') {
+		if (typeof el_to_match[0] != 'undefined') {
+			var x = el_to_match[0];
+			if (typeof el_to_match[1] != 'undefined') {
+				var y = el_to_match[1];
+				var rest = el_to_match.splice(2);
+				return (function() { 
+if (is_active(y)) { 
+return cons(activate(x), cons(deactivate(y), rest));} else { 
+return cons(x, cons(y, activate_next(rest)));}})();
+
+			}
+		}
+	}
+
+	return els;
+})();
+};
+function activate_prev(els) { 
+
+return (function() { 
+	var el_to_match = els;
+	if (get_type(el_to_match) == 'Array') {
+		if (typeof el_to_match[0] != 'undefined') {
+			var x = el_to_match[0];
+			if (typeof el_to_match[1] != 'undefined') {
+				var y = el_to_match[1];
+				var rest = el_to_match.splice(2);
+				return (function() { 
+if (is_active(x)) { 
+return cons(deactivate(x), cons(activate(y), rest));} else { 
+return cons(x, cons(y, activate_next(rest)));}})();
+
+			}
+		}
+	}
+
+	return els;
+})();
+};
 function update_view(ast) { 
 
 return $("#ast").text(jsDump.parse(ast));
 };
 $(document).ready(function () { 
 var ast = {t: "program", els: [], active: "t"}
-update_view(ast)
+var nodes = {t: "List", els: [activate(gen_new())], active: "t"}
+update_view(nodes)
 return $("#input").keyup(function (e) { 
-ast = update_ast(ast, e.which)
-return update_view(ast);
+nodes = update_node(nodes, e.which)
+return update_view(nodes);
 });
 });
