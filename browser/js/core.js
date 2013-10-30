@@ -62,3 +62,47 @@ function flatten(xs) {
 
 return foldl([], concat, xs);
 };
+function any(f, xs) { 
+
+return (function() { 
+	var el_to_match = xs;
+	if (get_type(el_to_match) == 'Array') {
+		if (0 == el_to_match.length) {
+			return "f";
+
+		}
+	}
+
+	if (get_type(el_to_match) == 'Array') {
+		var x = el_to_match[0];
+		var rest = el_to_match.splice(1);
+		return (function() { 
+if (f(x)) { 
+return "t";} else { 
+return any(f, rest);}})();
+
+	}})();
+};
+function inc(a) { 
+
+return (function(a,b) { return a + b; })(a, 1);
+};
+function dec(a) { 
+
+return (function(a,b) { return a - b; })(a, 1);
+};
+function min(a, b) { 
+
+return (function() { 
+if ((function(a,b) { return a <= b; })(a, b)) { 
+return a;} else { 
+return b;}})();
+};
+function max(a, b) { 
+
+return (function() { 
+if ((function(a,b) { return a >= b; })(a, b)) { 
+return a;} else { 
+return b;}})();
+};
+any((function(__partial_arg_1) { return (function(a,b) { return a == b; })(3, __partial_arg_1)}), [1, 2, 3]);

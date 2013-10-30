@@ -36,3 +36,18 @@
 
 (defn flatten xs
 	(foldl [] concat xs))
+
+(defn any f xs (match xs
+	([] "f")
+	([x & rest] (if (f x)
+				 "t"
+				(any f rest)))))
+
+(defn inc a (+ a 1))
+(defn dec a (- a 1))
+
+(defn min a b
+	(if (<= a b) a b))
+
+(defn max a b
+	(if (>= a b) a b))
