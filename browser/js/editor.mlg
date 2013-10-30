@@ -106,23 +106,23 @@
 (defn update_node node kc
 	(merge node
 		(match node
-			({t: "List" active: "t" els: els}
+			({t: "List" active: "t" els: els sel_el: el_ind}
 				(if (any is_active els)
 					{ els: (map (update_node _ kc) els) }
 					(match kc
-						(37 { els: (activate_prev els) })
-						(39 { els: (activate_next els) })
+						(37 { sel_el: (dec el_ind) })
+						(39 { sel_el: (inc el_ind) })
 						(38 { active: "f" })
-						(40 { els: (activate_first els) })
+						(40 { els: (activate_nth el_ind els) })
 						(32 { els: (concat (deactivate_all els) (activate (gen_new))) })
 						(_  {}))))
 
 			({t: "pending" active: "t"}
 				(match (.fromCharCode String kc)
 					("q" { t: "Str"  val: "" })
-					("[" { t: "Arr"  els: [(activate (gen_new))] })
-					("L" { t: "List" els: [(activate (gen_new))] })
-					("{" { t: "Obj"  els: [(activate (gen_new))] })
+					("[" { t: "Arr"  els: [(activate (gen_new))] sel_el: 0 })
+					("L" { t: "List" els: [(activate (gen_new))] sel_el: 0 })
+					("{" { t: "Obj"  els: [(activate (gen_new))] sel_el: 0 })
 					(num { t: "Num"  val: num })
 					(c   { t: "Atom" val: c })))
 
@@ -138,9 +138,14 @@
 (defn is_active el
 	(== (#active el) "t"))
 
+(defn activate_nth n els (match [n els]
+	([0 []]          [])
+	([0 [el & rest]] (cons (activate el) rest))
+	([i [el & rest]] (cons el (activate_nth (dec i) rest)))))
+	
 (defn activate_first els (match els
-	([] els
-	([el & rest] (cons (merge el { active: "t" }) rest)))))
+	([] els)
+	([el & rest] (cons (merge el { active: "t" }) rest))))
 
 (defn deactivate_all els
 	(map (merge _ { active: "f" }) els))
@@ -165,11 +170,11 @@
 
 	(def ast { t: "program" els: [] active: "t" })
 
-	(def nodes { t: "List" els: [(activate (gen_new))] active: "t" })
+	(def nodes { t: "List" els: [(activate (gen_new))] active: "t" sel_el: 0 })
 
 	(update_view nodes)
 
-	(.keyup ($ "#input") (fn e (
+	(.keydown ($ "#input") (fn e (
 		(set nodes (update_node nodes (#which e)))
 		(update_view nodes)
 		)))
