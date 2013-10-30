@@ -76,7 +76,7 @@ return (function() {
 	if (get_type(el_to_match) == 'Array') {
 		if (typeof el_to_match[0] != 'undefined') {
 			var x = el_to_match[0];
-			var rest = el_to_match.splice(1);
+			var rest = el_to_match.slice(1);
 			return (function() { 
 if (f(x)) { 
 return true;} else { 

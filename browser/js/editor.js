@@ -61,7 +61,7 @@ return merge(merge(ast, {name: {active: "f"}}), (function() {
 			if (get_type(el_to_match.args) == 'Array') {
 				if (typeof el_to_match.args.args[0] != 'undefined') {
 					var first = el_to_match.args[0];
-					var rest = el_to_match.args.splice(1);
+					var rest = el_to_match.args.slice(1);
 					return {args: cons(activate(first), rest)};
 
 				}
@@ -79,7 +79,7 @@ return merge(merge(ast, {name: {active: "f"}}), (function() {
 			if (get_type(el_to_match.args) == 'Array') {
 				if (typeof el_to_match.args.args[0] != 'undefined') {
 					var first = el_to_match.args[0];
-					var rest = el_to_match.args.splice(1);
+					var rest = el_to_match.args.slice(1);
 					return {args: cons(activate(first), rest)};
 
 				}
@@ -320,7 +320,7 @@ return merge(node, (function() {
 						if ('els' in el_to_match) {
 							var els = el_to_match.els;
 							return (function() { 
-if ((function(a,b) { return a == b; })(any(is_active, els), "t")) { 
+if (any(is_active, els)) { 
 return {els: map((function(__partial_arg_0) { return update_node(__partial_arg_0, kc)}), els)};} else { 
 return (function() { 
 	var el_to_match = kc;
@@ -443,7 +443,7 @@ return (function() {
 			var x = el_to_match[0];
 			if (typeof el_to_match[1] != 'undefined') {
 				var y = el_to_match[1];
-				var rest = el_to_match.splice(2);
+				var rest = el_to_match.slice(2);
 				return (function() { 
 if (is_active(y)) { 
 return cons(activate(x), cons(deactivate(y), rest));} else { 
@@ -465,7 +465,7 @@ return (function() {
 			var x = el_to_match[0];
 			if (typeof el_to_match[1] != 'undefined') {
 				var y = el_to_match[1];
-				var rest = el_to_match.splice(2);
+				var rest = el_to_match.slice(2);
 				return (function() { 
 if (is_active(x)) { 
 return cons(deactivate(x), cons(activate(y), rest));} else { 
