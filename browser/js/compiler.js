@@ -96,7 +96,7 @@ function gen_patt_info(patt, el, el_accessor) {
 					}
 
 					var new_accessor = el_accessor + '[' + i + ']';
-					res.push({type: 'Cond', cond: "typeof " + comp_el + new_accessor + " != 'undefined'"});
+					res.push({type: 'Cond', cond: "typeof " + el + new_accessor + " != 'undefined'"});
 					res.push(gen_patt_info(patt.elements[i], el, new_accessor));
 				};
 			}
