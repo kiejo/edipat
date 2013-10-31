@@ -51,3 +51,8 @@
 
 (defn max a b
 	(if (>= a b) a b))
+
+(defn range start end
+	(if (== start end)
+		[end]
+		(cons start (range (inc start) end))))

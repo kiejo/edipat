@@ -107,3 +107,10 @@ if ((function(a,b) { return a >= b; })(a, b)) {
 return a;} else { 
 return b;}})();
 };
+function range(start, end) { 
+
+return (function() { 
+if ((function(a,b) { return a == b; })(start, end)) { 
+return [end];} else { 
+return cons(start, range(inc(start), end));}})();
+};
