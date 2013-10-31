@@ -130,7 +130,7 @@ return map((function(__partial_arg_0) { return merge(__partial_arg_0, {active: "
 };
 function like_list(el) { 
 
-return any((function(__partial_arg_1) { return (function(a,b) { return a == b; })(el, __partial_arg_1)}), ["List", "Arr"]);
+return any((function(__partial_arg_1) { return (function(a,b) { return a == b; })(el, __partial_arg_1)}), ["List", "Arr", "Obj", "Pair"]);
 };
 function is_num(el) { 
 
@@ -222,6 +222,11 @@ return el_ind;}})()};
 
 	if ("{" == el_to_match) {
 		return {t: "Obj", els: [activate(gen_pending())], sel_el: 0};
+
+	}
+
+	if (":" == el_to_match) {
+		return {t: "Pair", els: [activate({t: "Atom", val: ""}), gen_pending()], sel_el: 0};
 
 	}
 
@@ -321,17 +326,6 @@ return el_ind;}})()};
 
 	if (get_type(el_to_match) == 'Array') {
 		if (typeof el_to_match[0] != 'undefined') {
-			if (" " == el_to_match[0]) {
-				if (typeof el_to_match[1] != 'undefined') {
-					return {active: "f"};
-
-				}
-			}
-		}
-	}
-
-	if (get_type(el_to_match) == 'Array') {
-		if (typeof el_to_match[0] != 'undefined') {
 			if (typeof el_to_match[1] != 'undefined') {
 				if (8 == el_to_match[1]) {
 					return {val: init(value)};
@@ -372,17 +366,6 @@ return el_ind;}})()};
 		if (typeof el_to_match[0] != 'undefined') {
 			if (typeof el_to_match[1] != 'undefined') {
 				if (38 == el_to_match[1]) {
-					return {active: "f"};
-
-				}
-			}
-		}
-	}
-
-	if (get_type(el_to_match) == 'Array') {
-		if (typeof el_to_match[0] != 'undefined') {
-			if (" " == el_to_match[0]) {
-				if (typeof el_to_match[1] != 'undefined') {
 					return {active: "f"};
 
 				}

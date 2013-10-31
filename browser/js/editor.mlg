@@ -28,7 +28,7 @@
 	(map (merge _ { active: "f" }) els))
 
 
-(defn like_list el (any (== el _) ["List" "Arr"]))
+(defn like_list el (any (== el _) ["List" "Arr" "Obj" "Pair"]))
 
 (defn is_num el (any (== el _) (range 0 9)))
 
@@ -53,6 +53,7 @@
 					("["      { t: "Arr"  els: [(activate (gen_pending))] sel_el: 0 })
 					("("      { t: "List" els: [(activate (gen_pending))] sel_el: 0 })
 					("{"      { t: "Obj"  els: [(activate (gen_pending))] sel_el: 0 })
+					(":"      { t: "Pair" els: [(activate { t: "Atom" val: "" }) (gen_pending)] sel_el: 0 })
 					((is_num) { t: "Num"  val: (.fromCharCode String kc) })
 					(c        { t: "Atom" val: c })))
 
@@ -66,14 +67,12 @@
 			({t: "Num" active: "t" val: value}
 				(match [(.fromCharCode String kc) kc]
 					([_       38] { active: "f" })
-					([" "      _] { active: "f" })
 					([_        8] { val: (init value) })
 					([(is_num) _] { val: (+ value (.fromCharCode String kc)) })))
 
 			({t: "Atom" active: "t" val: value}
 				(match [(.fromCharCode String kc) kc]
 					([_   38] { active: "f" })
-					([" "  _] { active: "f" })
 					([_    8] { val: (init value) })
 					([c    _] { val: (+ value c) })))
 
