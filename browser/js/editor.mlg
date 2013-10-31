@@ -37,9 +37,9 @@
 
 			({t: "pending" active: "t"}
 				(match (.fromCharCode String kc)
-					("q" { t: "Str"  val: "" })
+					("'" { t: "Str"  val: "" })
 					("[" { t: "Arr"  els: [(activate (gen_pending))] sel_el: 0 })
-					("L" { t: "List" els: [(activate (gen_pending))] sel_el: 0 })
+					("(" { t: "List" els: [(activate (gen_pending))] sel_el: 0 })
 					("{" { t: "Obj"  els: [(activate (gen_pending))] sel_el: 0 })
 					(num { t: "Num"  val: num })
 					(c   { t: "Atom" val: c })))
@@ -58,13 +58,24 @@
 (defn update_view ast
 	(.text ($ "#ast") (.parse jsDump ast)))
 
+(defn handle_keydown handler key_event
+	(if (any (== (#which key_event) _) [37, 39, 38, 40, 32])
+		(handler (#which key_event))
+		undefined))
+
+(defn handle_keypress handler key_event
+	(handler (#which key_event)))
+
+(defn update nodes keycode (
+	(set nodes (update_node nodes keycode))
+	(update_view nodes)
+))
+
 (.ready ($ document) (fn (
 	(def nodes { t: "List" els: [(activate (gen_pending))] active: "t" sel_el: 0 })
 	(update_view nodes)
 
-	(.keydown ($ "#input") (fn e (
-		(set nodes (update_node nodes (#which e)))
-		(update_view nodes)
-	)))
+	(.keydown  ($ "#input") (handle_keydown  (update nodes _) _))
+	(.keypress ($ "#input") (handle_keypress (update nodes _) _))
 
 )))

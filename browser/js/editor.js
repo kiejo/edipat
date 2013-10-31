@@ -133,6 +133,47 @@ return (function() {
 					if ("t" == el_to_match.active) {
 						return (function() { 
 	var el_to_match = String.fromCharCode(kc);
+	if ("'" == el_to_match) {
+		return {t: "Str", val: ""};
+
+	}
+
+	if ("[" == el_to_match) {
+		return {t: "Arr", els: [activate(gen_pending())], sel_el: 0};
+
+	}
+
+	if ("(" == el_to_match) {
+		return {t: "List", els: [activate(gen_pending())], sel_el: 0};
+
+	}
+
+	if ("{" == el_to_match) {
+		return {t: "Obj", els: [activate(gen_pending())], sel_el: 0};
+
+	}
+
+	var num = el_to_match;
+	return {t: "Num", val: num};
+
+
+	var c = el_to_match;
+	return {t: "Atom", val: c};
+})();
+
+					}
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
+			if ("Str" == el_to_match.t) {
+				if ('active' in el_to_match) {
+					if ("t" == el_to_match.active) {
+						return (function() { 
+	var el_to_match = String.fromCharCode(kc);
 	if ("q" == el_to_match) {
 		return {t: "Str", val: ""};
 
@@ -183,11 +224,24 @@ function update_view(ast) {
 
 return $("#ast").text(jsDump.parse(ast));
 };
+function handle_keydown(handler, key_event) { 
+
+return (function() { 
+if (any((function(__partial_arg_1) { return (function(a,b) { return a == b; })(key_event.which, __partial_arg_1)}), [37, 39, 38, 40, 32])) { 
+return handler(key_event.which);} else { 
+return undefined;}})();
+};
+function handle_keypress(handler, key_event) { 
+
+return handler(key_event.which);
+};
+function update(nodes, keycode) { 
+nodes = update_node(nodes, keycode)
+return update_view(nodes);
+};
 $(document).ready(function () { 
 var nodes = {t: "List", els: [activate(gen_pending())], active: "t", sel_el: 0}
 update_view(nodes)
-return $("#input").keydown(function (e) { 
-nodes = update_node(nodes, e.which)
-return update_view(nodes);
-});
+$("#input").keydown((function(__partial_arg_1) { return handle_keydown((function(__partial_arg_1) { return update(nodes, __partial_arg_1)}), __partial_arg_1)}))
+return $("#input").keypress((function(__partial_arg_1) { return handle_keypress((function(__partial_arg_1) { return update(nodes, __partial_arg_1)}), __partial_arg_1)}));
 });
