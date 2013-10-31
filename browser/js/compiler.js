@@ -84,6 +84,7 @@ function gen_patt_info(patt, el, el_accessor) {
 			} 
 		case "Number": return [{type: 'Cond', cond: compile(patt) + " == " + comp_el}];
 		case "String": return [{type: 'Cond', cond: compile(patt) + " == " + comp_el}];
+		case "List":   return [{type: 'Cond', cond: compile({ type: "List", elements: patt.elements.concat({ type: "Atom", name: comp_el }) }) }];
 		case "Array":
 			var res = [{type: 'Cond', cond: 'get_type(' + comp_el + ") == 'Array'"}];
 			if (patt.elements.length < 1) {
