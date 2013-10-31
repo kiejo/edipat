@@ -23,10 +23,14 @@
 	(map (merge _ { active: "f" }) els))
 
 
+(defn like_list el (any (== el _) ["List" "Arr"]))
+
+(defn is_num el (any (== el _) (range 0 9)))
+
 (defn update_node node kc
 	(merge node
 		(match node
-			({t: "List" active: "t" els: elems sel_el: el_ind}
+			({t: (like_list) active: "t" els: elems sel_el: el_ind}
 				(if (any is_active elems)
 					{ els: (map (update_node _ kc) elems) }
 					(match kc
@@ -39,12 +43,33 @@
 
 			({t: "pending" active: "t"}
 				(match (.fromCharCode String kc)
-					("'" { t: "Str"  val: "" })
-					("[" { t: "Arr"  els: [(activate (gen_pending))] sel_el: 0 })
-					("(" { t: "List" els: [(activate (gen_pending))] sel_el: 0 })
-					("{" { t: "Obj"  els: [(activate (gen_pending))] sel_el: 0 })
-					(num { t: "Num"  val: num })
-					(c   { t: "Atom" val: c })))
+					("'"      { t: "Str"  val: "" })
+					("["      { t: "Arr"  els: [(activate (gen_pending))] sel_el: 0 })
+					("("      { t: "List" els: [(activate (gen_pending))] sel_el: 0 })
+					("{"      { t: "Obj"  els: [(activate (gen_pending))] sel_el: 0 })
+					((is_num) { t: "Num"  val: (.fromCharCode String kc) })
+					(c        { t: "Atom" val: c })))
+
+			({t: "Str" active: "t" val: value}
+				(match [(.fromCharCode String kc) kc]
+					([_  38] { active: "f" })
+					(["'" _] { active: "f" })
+					([_   8] { val: (init value) })
+					([c   _] { val: (+ value c) })))
+
+			({t: "Num" active: "t" val: value}
+				(match [(.fromCharCode String kc) kc]
+					([_       38] { active: "f" })
+					([" "      _] { active: "f" })
+					([_        8] { val: (init value) })
+					([(is_num) _] { val: (+ value (.fromCharCode String kc)) })))
+
+			({t: "Atom" active: "t" val: value}
+				(match [(.fromCharCode String kc) kc]
+					([_   38] { active: "f" })
+					([" "  _] { active: "f" })
+					([_    8] { val: (init value) })
+					([c    _] { val: (+ value c) })))
 
 			(_ (match kc
 			 	(38 { active: "f" })
@@ -63,7 +88,7 @@
 	(.text ($ "#ast") (.parse jsDump ast)))
 
 (defn handle_keydown handler key_event
-	(if (any (== (#which key_event) _) [37, 39, 38, 40])
+	(if (any (== (#which key_event) _) [8 37 39 38 40])
 		(handler (#which key_event))
 		undefined))
 

@@ -76,13 +76,21 @@ function deactivate_all(els) {
 
 return map((function(__partial_arg_0) { return merge(__partial_arg_0, {active: "f"})}), els);
 };
+function like_list(el) { 
+
+return any((function(__partial_arg_1) { return (function(a,b) { return a == b; })(el, __partial_arg_1)}), ["List", "Arr"]);
+};
+function is_num(el) { 
+
+return any((function(__partial_arg_1) { return (function(a,b) { return a == b; })(el, __partial_arg_1)}), range(0, 9));
+};
 function update_node(node, kc) { 
 
 return merge(node, (function() { 
 	var el_to_match = node;
 	if (get_type(el_to_match) == 'Object') {
 		if ('t' in el_to_match) {
-			if ("List" == el_to_match.t) {
+			if (like_list(el_to_match.t)) {
 				if ('active' in el_to_match) {
 					if ("t" == el_to_match.active) {
 						if ('els' in el_to_match) {
@@ -157,14 +165,134 @@ return (function() {
 
 	}
 
-	var num = el_to_match;
-	return {t: "Num", val: num};
+	if (is_num(el_to_match)) {
+		return {t: "Num", val: String.fromCharCode(kc)};
 
+	}
 
 	var c = el_to_match;
 	return {t: "Atom", val: c};
 })();
 
+					}
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
+			if ("Str" == el_to_match.t) {
+				if ('active' in el_to_match) {
+					if ("t" == el_to_match.active) {
+						if ('val' in el_to_match) {
+							var value = el_to_match.val;
+							return (function() { 
+	var el_to_match = [String.fromCharCode(kc), kc];
+	if (get_type(el_to_match) == 'Array') {
+		if (typeof el_to_match[0] != 'undefined') {
+			if (typeof el_to_match[1] != 'undefined') {
+				if (38 == el_to_match[1]) {
+					return {active: "f"};
+
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Array') {
+		if (typeof el_to_match[0] != 'undefined') {
+			if ("'" == el_to_match[0]) {
+				if (typeof el_to_match[1] != 'undefined') {
+					return {active: "f"};
+
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Array') {
+		if (typeof el_to_match[0] != 'undefined') {
+			if (typeof el_to_match[1] != 'undefined') {
+				if (8 == el_to_match[1]) {
+					return {val: init(value)};
+
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Array') {
+		if (typeof el_to_match[0] != 'undefined') {
+			var c = el_to_match[0];
+			if (typeof el_to_match[1] != 'undefined') {
+				return {val: (function(a,b) { return a + b; })(value, c)};
+
+			}
+		}
+	}})();
+
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
+			if ("Num" == el_to_match.t) {
+				if ('active' in el_to_match) {
+					if ("t" == el_to_match.active) {
+						if ('val' in el_to_match) {
+							var value = el_to_match.val;
+							return (function() { 
+	var el_to_match = [String.fromCharCode(kc), kc];
+	if (get_type(el_to_match) == 'Array') {
+		if (typeof el_to_match[0] != 'undefined') {
+			if (typeof el_to_match[1] != 'undefined') {
+				if (38 == el_to_match[1]) {
+					return {active: "f"};
+
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Array') {
+		if (typeof el_to_match[0] != 'undefined') {
+			if (" " == el_to_match[0]) {
+				if (typeof el_to_match[1] != 'undefined') {
+					return {active: "f"};
+
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Array') {
+		if (typeof el_to_match[0] != 'undefined') {
+			if (typeof el_to_match[1] != 'undefined') {
+				if (8 == el_to_match[1]) {
+					return {val: init(value)};
+
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Array') {
+		if (typeof el_to_match[0] != 'undefined') {
+			if (is_num(el_to_match[0])) {
+				if (typeof el_to_match[1] != 'undefined') {
+					return {val: (function(a,b) { return a + b; })(value, String.fromCharCode(kc))};
+
+				}
+			}
+		}
+	}})();
+
+						}
 					}
 				}
 			}
@@ -191,7 +319,7 @@ return $("#ast").text(jsDump.parse(ast));
 function handle_keydown(handler, key_event) { 
 
 return (function() { 
-if (any((function(__partial_arg_1) { return (function(a,b) { return a == b; })(key_event.which, __partial_arg_1)}), [37, 39, 38, 40])) { 
+if (any((function(__partial_arg_1) { return (function(a,b) { return a == b; })(key_event.which, __partial_arg_1)}), [8, 37, 39, 38, 40])) { 
 return handler(key_event.which);} else { 
 return undefined;}})();
 };
