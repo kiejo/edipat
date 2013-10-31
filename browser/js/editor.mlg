@@ -1,5 +1,7 @@
 //form generators
 
+(defn gen_root { t: "List" els: [(gen_pending)] active: "t" sel_el: 0 } )
+
 (defn gen_pending { t: "pending" })
 
 
@@ -24,15 +26,15 @@
 (defn update_node node kc
 	(merge node
 		(match node
-			({t: "List" active: "t" els: els sel_el: el_ind}
-				(if (any is_active els)
-					{ els: (map (update_node _ kc) els) }
+			({t: "List" active: "t" els: elems sel_el: el_ind}
+				(if (any is_active elems)
+					{ els: (map (update_node _ kc) elems) }
 					(match kc
 						(37 { sel_el: (dec el_ind) })
 						(39 { sel_el: (inc el_ind) })
 						(38 { active: "f" })
-						(40 { els: (activate_nth el_ind els) })
-						(32 { els: (concat (deactivate_all els) (activate (gen_pending))) })
+						(40 { els: (activate_nth el_ind elems) })
+						(32 { els: (concat (deactivate_all elems) (activate (gen_pending))) sel_el: (inc el_ind) })
 						(_  {}))))
 
 			({t: "pending" active: "t"}
@@ -55,11 +57,13 @@
 
 //view and user interaction
 
+(def root_node (gen_root))
+
 (defn update_view ast
 	(.text ($ "#ast") (.parse jsDump ast)))
 
 (defn handle_keydown handler key_event
-	(if (any (== (#which key_event) _) [37, 39, 38, 40, 32])
+	(if (any (== (#which key_event) _) [37, 39, 38, 40])
 		(handler (#which key_event))
 		undefined))
 
@@ -67,15 +71,15 @@
 	(handler (#which key_event)))
 
 (defn update nodes keycode (
-	(set nodes (update_node nodes keycode))
-	(update_view nodes)
+	(set root_node (update_node nodes keycode))
+	(update_view root_node)
 ))
 
 (.ready ($ document) (fn (
-	(def nodes { t: "List" els: [(activate (gen_pending))] active: "t" sel_el: 0 })
-	(update_view nodes)
 
-	(.keydown  ($ "#input") (handle_keydown  (update nodes _) _))
-	(.keypress ($ "#input") (handle_keypress (update nodes _) _))
+	(update root_node 40) //activate first child
+
+	(.keydown  ($ "#input") (handle_keydown  (update root_node _) _))
+	(.keypress ($ "#input") (handle_keypress (update root_node _) _))
 
 )))
