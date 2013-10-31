@@ -72,6 +72,58 @@ return (function() {
 		}
 	}})();
 };
+function remove_nth(n, els) { 
+
+return (function() { 
+	var el_to_match = [n, els];
+	if (get_type(el_to_match) == 'Array') {
+		if (typeof el_to_match[0] != 'undefined') {
+			if (0 == el_to_match[0]) {
+				if (typeof el_to_match[1] != 'undefined') {
+					if (get_type(el_to_match[1]) == 'Array') {
+						if (0 == el_to_match[1].length) {
+							return [];
+
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Array') {
+		if (typeof el_to_match[0] != 'undefined') {
+			if (0 == el_to_match[0]) {
+				if (typeof el_to_match[1] != 'undefined') {
+					if (get_type(el_to_match[1]) == 'Array') {
+						if (typeof el_to_match[1][0] != 'undefined') {
+							var el = el_to_match[1][0];
+							var rest = el_to_match[1].slice(1);
+							return rest;
+
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Array') {
+		if (typeof el_to_match[0] != 'undefined') {
+			var i = el_to_match[0];
+			if (typeof el_to_match[1] != 'undefined') {
+				if (get_type(el_to_match[1]) == 'Array') {
+					if (typeof el_to_match[1][0] != 'undefined') {
+						var el = el_to_match[1][0];
+						var rest = el_to_match[1].slice(1);
+						return cons(el, remove_nth(dec(i), rest));
+
+					}
+				}
+			}
+		}
+	}})();
+};
 function deactivate_all(els) { 
 
 return map((function(__partial_arg_0) { return merge(__partial_arg_0, {active: "f"})}), els);
@@ -119,6 +171,14 @@ return (function() {
 
 	if (40 == el_to_match) {
 		return {els: activate_nth(el_ind, elems)};
+
+	}
+
+	if (46 == el_to_match) {
+		return {els: remove_nth(el_ind, elems), sel_el: (function() { 
+if ((function(a,b) { return a == b; })(elems.length, inc(el_ind))) { 
+return dec(el_ind);} else { 
+return el_ind;}})()};
 
 	}
 
@@ -299,6 +359,65 @@ return (function() {
 		}
 	}
 
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
+			if ("Atom" == el_to_match.t) {
+				if ('active' in el_to_match) {
+					if ("t" == el_to_match.active) {
+						if ('val' in el_to_match) {
+							var value = el_to_match.val;
+							return (function() { 
+	var el_to_match = [String.fromCharCode(kc), kc];
+	if (get_type(el_to_match) == 'Array') {
+		if (typeof el_to_match[0] != 'undefined') {
+			if (typeof el_to_match[1] != 'undefined') {
+				if (38 == el_to_match[1]) {
+					return {active: "f"};
+
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Array') {
+		if (typeof el_to_match[0] != 'undefined') {
+			if (" " == el_to_match[0]) {
+				if (typeof el_to_match[1] != 'undefined') {
+					return {active: "f"};
+
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Array') {
+		if (typeof el_to_match[0] != 'undefined') {
+			if (typeof el_to_match[1] != 'undefined') {
+				if (8 == el_to_match[1]) {
+					return {val: init(value)};
+
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Array') {
+		if (typeof el_to_match[0] != 'undefined') {
+			var c = el_to_match[0];
+			if (typeof el_to_match[1] != 'undefined') {
+				return {val: (function(a,b) { return a + b; })(value, c)};
+
+			}
+		}
+	}})();
+
+						}
+					}
+				}
+			}
+		}
+	}
+
 	return (function() { 
 	var el_to_match = kc;
 	if (38 == el_to_match) {
@@ -319,7 +438,7 @@ return $("#ast").text(jsDump.parse(ast));
 function handle_keydown(handler, key_event) { 
 
 return (function() { 
-if (any((function(__partial_arg_1) { return (function(a,b) { return a == b; })(key_event.which, __partial_arg_1)}), [8, 37, 39, 38, 40])) { 
+if (any((function(__partial_arg_1) { return (function(a,b) { return a == b; })(key_event.which, __partial_arg_1)}), [8, 37, 39, 38, 40, 46])) { 
 return handler(key_event.which);} else { 
 return undefined;}})();
 };

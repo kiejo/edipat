@@ -19,6 +19,11 @@
 	([0 [el & rest]] (cons (activate el) rest))
 	([i [el & rest]] (cons el (activate_nth (dec i) rest)))))
 
+(defn remove_nth n els (match [n els]
+	([0 []]          [])
+	([0 [el & rest]] rest)
+	([i [el & rest]] (cons el (remove_nth (dec i) rest)))))
+
 (defn deactivate_all els
 	(map (merge _ { active: "f" }) els))
 
@@ -38,6 +43,7 @@
 						(39 { sel_el: (inc el_ind) })
 						(38 { active: "f" })
 						(40 { els: (activate_nth el_ind elems) })
+						(46 { els: (remove_nth   el_ind elems) sel_el: (if (== (#length elems) (inc el_ind)) (dec el_ind) el_ind) })
 						(32 { els: (concat (deactivate_all elems) (activate (gen_pending))) sel_el: (inc el_ind) })
 						(_  {}))))
 
@@ -88,7 +94,7 @@
 	(.text ($ "#ast") (.parse jsDump ast)))
 
 (defn handle_keydown handler key_event
-	(if (any (== (#which key_event) _) [8 37 39 38 40])
+	(if (any (== (#which key_event) _) [8 37 39 38 40 46])
 		(handler (#which key_event))
 		undefined))
 
