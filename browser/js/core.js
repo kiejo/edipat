@@ -165,3 +165,46 @@ if ((function(a,b) { return a == b; })(start, end)) {
 return [end];} else { 
 return cons(start, range(inc(start), end));}})();
 };
+function insert_at(n, el, xs) { 
+
+return (function() { 
+	var el_to_match = [n, xs];
+	if (get_type(el_to_match) == 'Array') {
+		if (el_to_match.length == 2) {
+			if (get_type(el_to_match[1]) == 'Array') {
+				if (el_to_match[1].length == 0) {
+					return [el];
+
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Array') {
+		if (el_to_match.length == 2) {
+			if (0 == el_to_match[0]) {
+				if (get_type(el_to_match[1]) == 'Array') {
+					if (typeof el_to_match[1][0] != 'undefined') {
+						var x = el_to_match[1][0];
+						var rest = el_to_match[1].slice(1);
+						return concat([el, x], rest);
+
+					}
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Array') {
+		if (el_to_match.length == 2) {
+			if (get_type(el_to_match[1]) == 'Array') {
+				if (typeof el_to_match[1][0] != 'undefined') {
+					var x = el_to_match[1][0];
+					var rest = el_to_match[1].slice(1);
+					return cons(x, insert_at(dec(n), el, rest));
+
+				}
+			}
+		}
+	}})();
+};

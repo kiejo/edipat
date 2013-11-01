@@ -67,3 +67,8 @@
 	(if (== start end)
 		[end]
 		(cons start (range (inc start) end))))
+
+(defn insert_at n el xs (match [n xs]
+	([_ []] [el])
+	([0 [x & rest]] (concat [el x] rest))
+	([_ [x & rest]] (cons x (insert_at (dec n) el rest)))))
