@@ -84,7 +84,12 @@ function gen_patt_info(patt, el, el_accessor) {
 			} 
 		case "Number": return [{type: 'Cond', cond: compile(patt) + " == " + comp_el}];
 		case "String": return [{type: 'Cond', cond: compile(patt) + " == " + comp_el}];
-		case "List":   return [{type: 'Cond', cond: compile({ type: "List", elements: patt.elements.concat({ type: "Atom", name: comp_el }) }) }];
+		case "List":
+			if (patt.elements.length > 1) {
+				return [{type: 'Cond', cond: compile({ type: "List", elements: [patt, { type: "Atom", name: comp_el }] }) }];
+			} else {
+				return [{type: 'Cond', cond: compile({ type: "List", elements: patt.elements.concat({ type: "Atom", name: comp_el }) }) }];
+			}
 		case "Array":
 			var res = [{type: 'Cond', cond: 'get_type(' + comp_el + ") == 'Array'"}];
 
@@ -121,8 +126,8 @@ function gen_patt_info(patt, el, el_accessor) {
 }
 
 function comp_list(els) {
-	if (els[0].type == 'Atom') {
-		var op = els[0].name;
+	if (els[0].type == 'Atom' || els[0].type == 'List') {
+		var op = els[0].name || "";
 
 		if (op == "def")
 		{
@@ -168,7 +173,13 @@ function comp_list(els) {
 		{
 			return compile(els[2]) + "[" + compile(els[1]) + "]";
 		}
-		else //treat as function call or partial function
+		else if (op == "do") {
+			//treat as sequential operations, return last statement
+			return "(function() { \n" + 
+						_.map(_.initial(_.tail(els)), compile).join(";\n") + ";\n" + "return " + compile(_.last(els)) + ";\n" +
+		       		"})()"
+		}
+		else //treat as function call or partial function call
 		{
 			var partial_arg_prefix = '__partial_arg_';
 
@@ -176,8 +187,9 @@ function comp_list(els) {
 				return arg.type == 'Atom' && arg.name == '_' ? partial_arg_prefix + i : compile(arg);
 			}
 
+			var fn_name = els[0].type == 'List' ? '(' + compile(els[0]) + ')' : compile(els[0]);
 			var compiled_args = _.map(_.tail(els), compile_arg);
-			var compiled_fn_call = compile(els[0]) + "(" + compiled_args.join(", ") + ")";
+			var compiled_fn_call = fn_name + "(" + compiled_args.join(", ") + ")";
 
 			var partial_args = _.filter(compiled_args, function(arg) { return (typeof arg == 'string') && arg.indexOf(partial_arg_prefix) == 0; });
 
@@ -189,11 +201,6 @@ function comp_list(els) {
 			}
 		}
 
-	} else if (els[0].type == 'List') {
-		//treat as sequential operations, return last statement
-		return "(function() { \n" + 
-					_.map(_.initial(els), compile).join(";\n") + ";\n" + "return " + compile(_.last(els)) + ";\n" +
-		       "})()"
 	}
 
 	throw "expected atom or list. Got " + els[0].type + " instead.";

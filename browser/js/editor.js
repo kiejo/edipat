@@ -124,29 +124,12 @@ function contains_active_elem(els) {
 
 return any(is_active, els);
 };
-function contains_active_type(type) { 
+function contains_active_type(type, els) { 
 
-return (function(__partial_arg_1) { return any(function (el) { 
+return any(function (el) { 
 
 return (function(a,b) { return a && b; })((function(a,b) { return a == b; })(el.t, type), is_active(el));
-}, __partial_arg_1)});
-};
-;
-function contains_active_atom() { 
-
-return contains_active_type("Atom");
-};
-function contains_active_str() { 
-
-return contains_active_type("Str");
-};
-function contains_active_num() { 
-
-return contains_active_type("Num");
-};
-function contains_active_num() { 
-
-return contains_active_type("List");
+}, els);
 };
 function get_triggered_input(node, input) { 
 
@@ -161,7 +144,7 @@ return (function() {
 							if ('active' in el_to_match[1]) {
 								if ("t" == el_to_match[1].active) {
 									if ('els' in el_to_match[1]) {
-										if (contains_active_atom(el_to_match[1].els)) {
+										if (((function(__partial_arg_1) { return contains_active_type("Atom", __partial_arg_1)}))(el_to_match[1].els)) {
 											return ["uarr", " "];
 
 										}
@@ -184,7 +167,7 @@ return (function() {
 							if ('active' in el_to_match[1]) {
 								if ("t" == el_to_match[1].active) {
 									if ('els' in el_to_match[1]) {
-										if (contains_active_num(el_to_match[1].els)) {
+										if (((function(__partial_arg_1) { return contains_active_type("Num", __partial_arg_1)}))(el_to_match[1].els)) {
 											return ["uarr", " "];
 
 										}
@@ -207,7 +190,7 @@ return (function() {
 							if ('active' in el_to_match[1]) {
 								if ("t" == el_to_match[1].active) {
 									if ('els' in el_to_match[1]) {
-										if (contains_active_str(el_to_match[1].els)) {
+										if (((function(__partial_arg_1) { return contains_active_type("Str", __partial_arg_1)}))(el_to_match[1].els)) {
 											return ["uarr", " "];
 
 										}
@@ -230,7 +213,7 @@ return (function() {
 							if ('active' in el_to_match[1]) {
 								if ("t" == el_to_match[1].active) {
 									if ('els' in el_to_match[1]) {
-										if (contains_active_atom(el_to_match[1].els)) {
+										if (((function(__partial_arg_1) { return contains_active_type("Atom", __partial_arg_1)}))(el_to_match[1].els)) {
 											return ["uarr", "del", "darr"];
 
 										}
@@ -619,12 +602,18 @@ return str(["<span class='", cl, "'>", cont, "</span>"]);
 ;
 var root_node = gen_root();
 function update_view(node) { 
-$("#ast").text(jsDump.parse(node))
+
+return (function() { 
+$("#ast").text(jsDump.parse(node));
 return $("#rendered").html(render(node));
+})();
 };
 function update(node, input) { 
-root_node = update_node_multi(node, get_triggered_input(node, input))
+
+return (function() { 
+root_node = update_node_multi(node, get_triggered_input(node, input));
 return update_view(root_node);
+})();
 };
 ;
 var special_input = [[8, "bs"], [37, "larr"], [38, "uarr"], [39, "rarr"], [40, "darr"], [46, "del"]];
@@ -698,8 +687,11 @@ function handle_keypress(handler, key_event) {
 return handler(String.fromCharCode(key_event.which));
 };
 $(document).ready(function () { 
-update(root_node, "darr")
 
-$("#input").keydown((function(__partial_arg_1) { return handle_keydown((function(__partial_arg_1) { return update(root_node, __partial_arg_1)}), __partial_arg_1)}))
+return (function() { 
+update(root_node, "darr");
+;
+$("#input").keydown((function(__partial_arg_1) { return handle_keydown((function(__partial_arg_1) { return update(root_node, __partial_arg_1)}), __partial_arg_1)}));
 return $("#input").keypress((function(__partial_arg_1) { return handle_keypress((function(__partial_arg_1) { return update(root_node, __partial_arg_1)}), __partial_arg_1)}));
+})();
 });

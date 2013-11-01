@@ -31,22 +31,16 @@
 
 (defn contains_active_elem els (any is_active els))
 
-(defn contains_active_type type
-	(any (fn el (&& (== (#t el) type) (is_active el))) _))
-
-//TODO: fix these
-(defn contains_active_atom (contains_active_type "Atom"))
-(defn contains_active_str  (contains_active_type "Str"))
-(defn contains_active_num  (contains_active_type "Num"))
-(defn contains_active_num  (contains_active_type "List"))
+(defn contains_active_type type els
+	(any (fn el (&& (== (#t el) type) (is_active el))) els))
 
 (defn get_triggered_input node input
 	(match [input node]
-		([" " {t: "List" active: "t" els: (contains_active_atom)}] ["uarr" " "])
-		([" " {t: "List" active: "t" els: (contains_active_num)}]  ["uarr" " "])
-		(["'" {t: "List" active: "t" els: (contains_active_str)}]  ["uarr" " "])
+		([" " {t: "List" active: "t" els: (contains_active_type "Atom" _)}] ["uarr" " "])
+		([" " {t: "List" active: "t" els: (contains_active_type "Num" _)}]  ["uarr" " "])
+		(["'" {t: "List" active: "t" els: (contains_active_type "Str" _)}]  ["uarr" " "])
 
-		(["del" {t: "List" active: "t" els: (contains_active_atom)}] ["uarr" "del" "darr"])
+		(["del" {t: "List" active: "t" els: (contains_active_type "Atom" _)}] ["uarr" "del" "darr"])
 
 		(_ [input])
 ))
@@ -139,12 +133,12 @@
 
 (def root_node (gen_root))
 
-(defn update_view node (
+(defn update_view node (do
 	(.text ($ "#ast") (.parse jsDump node))
 	(.html ($ "#rendered") (render node)))
 )
 
-(defn update node input (
+(defn update node input (do
 	(set root_node (update_node_multi node (get_triggered_input node input)))
 	(update_view root_node)
 ))
@@ -182,7 +176,7 @@
 (defn handle_keypress handler key_event
 	(handler (.fromCharCode String (#which key_event))))
 
-(.ready ($ document) (fn (
+(.ready ($ document) (fn (do
 
 	(update root_node "darr") //activate first child
 

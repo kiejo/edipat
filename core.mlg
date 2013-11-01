@@ -15,8 +15,8 @@
 (defn each f xs
 	(if (empty xs)
 		undefined
-		((f (head xs))
-		 (each f (tail xs)))))
+		(do (f (head xs))
+		 	(each f (tail xs)))))
 
 (defn map f xs
 	(if (empty xs)
