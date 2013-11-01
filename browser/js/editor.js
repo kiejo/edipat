@@ -116,6 +116,10 @@ function deactivate_all(els) {
 
 return map((function(__partial_arg_0) { return merge(__partial_arg_0, {active: "f"})}), els);
 };
+function is_active_list(el) { 
+
+return (function(a,b) { return a && b; })(like_list(el), is_active(el));
+};
 function like_list(el) { 
 
 return any((function(__partial_arg_1) { return (function(a,b) { return a == b; })(el, __partial_arg_1)}), ["List", "Arr", "Obj", "Pair"]);
@@ -127,6 +131,17 @@ return any((function(__partial_arg_1) { return (function(a,b) { return a == b; }
 return n.toString();
 }, range(0, 9)));
 };
+function contains_active_elem(els) { 
+
+return any(is_active, els);
+};
+function contains_active_atom(els) { 
+
+return any(function (el) { 
+
+return (function(a,b) { return a && b; })((function(a,b) { return a == b; })(el.t, "Atom"), (function(a,b) { return a == b; })(el.active, "t"));
+}, els);
+};
 function update_node(node, kc) { 
 
 return merge(node, (function() { 
@@ -137,13 +152,30 @@ return merge(node, (function() {
 				if ('active' in el_to_match) {
 					if ("t" == el_to_match.active) {
 						if ('els' in el_to_match) {
+							if (contains_active_elem(el_to_match.els)) {
+								if ('sel_el' in el_to_match) {
+									var el_ind = el_to_match.sel_el;
+									return {els: map((function(__partial_arg_0) { return update_node(__partial_arg_0, kc)}), node.els)};
+
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
+			if (like_list(el_to_match.t)) {
+				if ('active' in el_to_match) {
+					if ("t" == el_to_match.active) {
+						if ('els' in el_to_match) {
 							var elems = el_to_match.els;
 							if ('sel_el' in el_to_match) {
 								var el_ind = el_to_match.sel_el;
 								return (function() { 
-if (any(is_active, elems)) { 
-return {els: map((function(__partial_arg_0) { return update_node(__partial_arg_0, kc)}), elems)};} else { 
-return (function() { 
 	var el_to_match = kc;
 	if (37 == el_to_match) {
 		return {sel_el: dec(el_ind)};
@@ -179,7 +211,7 @@ return el_ind;}})()};
 	}
 
 	return {};
-})();}})();
+})();
 
 							}
 						}
@@ -383,6 +415,10 @@ return el_ind;}})()};
 })();
 })());
 };
+function update_node_multi(node, keycodes) { 
+
+return foldl(node, update_node, keycodes);
+};
 ;
 function render(node) { 
 
@@ -539,7 +575,7 @@ function handle_keypress(handler, key_event) {
 return handler(key_event.which);
 };
 function update(nodes, keycode) { 
-root_node = update_node(nodes, keycode)
+root_node = update_node_multi(nodes, [40, 68, 69, 38, 32, 68])
 return update_view(root_node);
 };
 $(document).ready(function () { 

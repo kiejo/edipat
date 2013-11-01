@@ -27,25 +27,31 @@
 (defn deactivate_all els
 	(map (merge _ { active: "f" }) els))
 
-
 (defn like_list el (any (== el _) ["List" "Arr" "Obj" "Pair"]))
 
 (defn is_num el (any (== el _) (map (fn n (.toString n)) (range 0 9))))
 
+(defn contains_active_elem els (any is_active els))
+
+(defn contains_active_atom els
+	(any (fn el (&& (== (#t el) "Atom") (== (#active el) "t"))) els))
+
 (defn update_node node kc
 	(merge node
 		(match node
+			
+			({t: (like_list) active: "t" els: (contains_active_elem) sel_el: el_ind}
+				{ els: (map (update_node _ kc) (#els node)) })
+
 			({t: (like_list) active: "t" els: elems sel_el: el_ind}
-				(if (any is_active elems)
-					{ els: (map (update_node _ kc) elems) }
-					(match kc
-						(37 { sel_el: (dec el_ind) })
-						(39 { sel_el: (inc el_ind) })
-						(38 { active: "f" })
-						(40 { els: (activate_nth el_ind elems) })
-						(46 { els: (remove_nth   el_ind elems) sel_el: (if (== (#length elems) (inc el_ind)) (dec el_ind) el_ind) })
-						(32 { els: (concat (deactivate_all elems) (activate (gen_pending))) sel_el: (inc el_ind) })
-						(_  {}))))
+				(match kc
+					(37 { sel_el: (dec el_ind) })
+					(39 { sel_el: (inc el_ind) })
+					(38 { active: "f" })
+					(40 { els: (activate_nth el_ind elems) })
+					(46 { els: (remove_nth   el_ind elems) sel_el: (if (== (#length elems) (inc el_ind)) (dec el_ind) el_ind) })
+					(32 { els: (concat (deactivate_all elems) (activate (gen_pending))) sel_el: (inc el_ind) })
+					(_  {})))
 
 			({t: "pending" active: "t"}
 				(match (.fromCharCode String kc)
@@ -83,6 +89,8 @@
 	)
 )
 
+(defn update_node_multi node keycodes
+	(foldl node update_node keycodes))
 
 //renderer
 
