@@ -40,6 +40,9 @@
 		([" " {t: "List" active: "t" els: (contains_active_type "Num" _)}]  ["uarr" " "])
 		(["'" {t: "List" active: "t" els: (contains_active_type "Str" _)}]  ["uarr" " "])
 
+		(["larr" {t: "List" active: "t" els: (contains_active_type "Atom" _)}] ["uarr" "larr" "darr"])
+		(["rarr" {t: "List" active: "t" els: (contains_active_type "Atom" _)}] ["uarr" "rarr" "darr"])
+
 		(["del" {t: "List" active: "t" els: (contains_active_type "Atom" _)}] ["uarr" "del" "darr"])
 
 		(_ [input])
@@ -58,7 +61,7 @@
 				("uarr" { active: "f" })
 				("darr" { els: (activate_nth el_ind elems) })
 				("del"  { els: (remove_nth   el_ind elems) sel_el: (if (== (#length elems) (inc el_ind)) (dec el_ind) el_ind) })
-				(" "    { els: (concat (deactivate_all elems) (activate (gen_pending))) sel_el: (inc el_ind) })
+				(" "    { els: (insert_at (inc el_ind) (activate (gen_pending)) (deactivate_all elems)) sel_el: (inc el_ind) })
 				(_  {})))
 
 		({t: "pending" active: "t"}
