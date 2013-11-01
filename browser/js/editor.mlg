@@ -30,7 +30,7 @@
 
 (defn like_list el (any (== el _) ["List" "Arr" "Obj" "Pair"]))
 
-(defn is_num el (any (== el _) (range 0 9)))
+(defn is_num el (any (== el _) (map (fn n (.toString n)) (range 0 9))))
 
 (defn update_node node kc
 	(merge node
@@ -84,13 +84,46 @@
 )
 
 
+//renderer
+
+(defn render node (match node
+	({t: "List" els: elems sel_el: sel_ind active: act}
+		(str ["(" (join " " (map render elems)) ")"]))
+
+	({t: "Arr" els: elems sel_el: sel_ind}
+		(str ["[" (join " " (map render elems)) "]"]))
+
+	({t: "Obj" els: elems sel_el: sel_ind}
+		(str ["{ " (join " " (map render elems)) " }"]))
+
+	({t: "Pair" els: [k v]} (str [(render k) ": " (render v)]))
+
+	({t: "Num" val: value  active: act} (render_active value act))
+
+	({t: "Str" val: value  active: act} (str ["'" (render_active value act) "'"]))
+
+	({t: "Atom" val: value  active: act} (render_active value act))
+
+	({t: "pending" active: act} (render_active "..." act))
+
+))
+
+(defn render_active s is_active
+	(if (== is_active "t")
+		(wrap_span s "active")
+		s))
+
+(defn wrap_span cont cl (str ["<span class='" cl "'>" cont "</span>"]))
+
 
 //view and user interaction
 
 (def root_node (gen_root))
 
-(defn update_view ast
-	(.text ($ "#ast") (.parse jsDump ast)))
+(defn update_view node (
+	(.text ($ "#ast") (.parse jsDump node))
+	(.html ($ "#rendered") (render node)))
+)
 
 (defn handle_keydown handler key_event
 	(if (any (== (#which key_event) _) [8 37 39 38 40 46])

@@ -45,7 +45,7 @@
 
 (defn join s xs (match xs
 	([]          "")
-	([x y]      (str [x s y]))
+	([x]         (+ "" x))
 	([x & rest] (str [x s (join s rest)]))))
 
 (defn inc a (+ a 1))

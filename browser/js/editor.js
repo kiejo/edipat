@@ -25,14 +25,12 @@ function activate_nth(n, els) {
 return (function() { 
 	var el_to_match = [n, els];
 	if (get_type(el_to_match) == 'Array') {
-		if (typeof el_to_match[0] != 'undefined') {
+		if (el_to_match.length == 2) {
 			if (0 == el_to_match[0]) {
-				if (typeof el_to_match[1] != 'undefined') {
-					if (get_type(el_to_match[1]) == 'Array') {
-						if (0 == el_to_match[1].length) {
-							return [];
+				if (get_type(el_to_match[1]) == 'Array') {
+					if (el_to_match[1].length == 0) {
+						return [];
 
-						}
 					}
 				}
 			}
@@ -40,33 +38,29 @@ return (function() {
 	}
 
 	if (get_type(el_to_match) == 'Array') {
-		if (typeof el_to_match[0] != 'undefined') {
+		if (el_to_match.length == 2) {
 			if (0 == el_to_match[0]) {
-				if (typeof el_to_match[1] != 'undefined') {
-					if (get_type(el_to_match[1]) == 'Array') {
-						if (typeof el_to_match[1][0] != 'undefined') {
-							var el = el_to_match[1][0];
-							var rest = el_to_match[1].slice(1);
-							return cons(activate(el), rest);
-
-						}
-					}
-				}
-			}
-		}
-	}
-
-	if (get_type(el_to_match) == 'Array') {
-		if (typeof el_to_match[0] != 'undefined') {
-			var i = el_to_match[0];
-			if (typeof el_to_match[1] != 'undefined') {
 				if (get_type(el_to_match[1]) == 'Array') {
 					if (typeof el_to_match[1][0] != 'undefined') {
 						var el = el_to_match[1][0];
 						var rest = el_to_match[1].slice(1);
-						return cons(el, activate_nth(dec(i), rest));
+						return cons(activate(el), rest);
 
 					}
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Array') {
+		if (el_to_match.length == 2) {
+			var i = el_to_match[0];
+			if (get_type(el_to_match[1]) == 'Array') {
+				if (typeof el_to_match[1][0] != 'undefined') {
+					var el = el_to_match[1][0];
+					var rest = el_to_match[1].slice(1);
+					return cons(el, activate_nth(dec(i), rest));
+
 				}
 			}
 		}
@@ -77,14 +71,12 @@ function remove_nth(n, els) {
 return (function() { 
 	var el_to_match = [n, els];
 	if (get_type(el_to_match) == 'Array') {
-		if (typeof el_to_match[0] != 'undefined') {
+		if (el_to_match.length == 2) {
 			if (0 == el_to_match[0]) {
-				if (typeof el_to_match[1] != 'undefined') {
-					if (get_type(el_to_match[1]) == 'Array') {
-						if (0 == el_to_match[1].length) {
-							return [];
+				if (get_type(el_to_match[1]) == 'Array') {
+					if (el_to_match[1].length == 0) {
+						return [];
 
-						}
 					}
 				}
 			}
@@ -92,33 +84,29 @@ return (function() {
 	}
 
 	if (get_type(el_to_match) == 'Array') {
-		if (typeof el_to_match[0] != 'undefined') {
+		if (el_to_match.length == 2) {
 			if (0 == el_to_match[0]) {
-				if (typeof el_to_match[1] != 'undefined') {
-					if (get_type(el_to_match[1]) == 'Array') {
-						if (typeof el_to_match[1][0] != 'undefined') {
-							var el = el_to_match[1][0];
-							var rest = el_to_match[1].slice(1);
-							return rest;
-
-						}
-					}
-				}
-			}
-		}
-	}
-
-	if (get_type(el_to_match) == 'Array') {
-		if (typeof el_to_match[0] != 'undefined') {
-			var i = el_to_match[0];
-			if (typeof el_to_match[1] != 'undefined') {
 				if (get_type(el_to_match[1]) == 'Array') {
 					if (typeof el_to_match[1][0] != 'undefined') {
 						var el = el_to_match[1][0];
 						var rest = el_to_match[1].slice(1);
-						return cons(el, remove_nth(dec(i), rest));
+						return rest;
 
 					}
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Array') {
+		if (el_to_match.length == 2) {
+			var i = el_to_match[0];
+			if (get_type(el_to_match[1]) == 'Array') {
+				if (typeof el_to_match[1][0] != 'undefined') {
+					var el = el_to_match[1][0];
+					var rest = el_to_match[1].slice(1);
+					return cons(el, remove_nth(dec(i), rest));
+
 				}
 			}
 		}
@@ -134,7 +122,10 @@ return any((function(__partial_arg_1) { return (function(a,b) { return a == b; }
 };
 function is_num(el) { 
 
-return any((function(__partial_arg_1) { return (function(a,b) { return a == b; })(el, __partial_arg_1)}), range(0, 9));
+return any((function(__partial_arg_1) { return (function(a,b) { return a == b; })(el, __partial_arg_1)}), map(function (n) { 
+
+return n.toString();
+}, range(0, 9)));
 };
 function update_node(node, kc) { 
 
@@ -255,45 +246,37 @@ return el_ind;}})()};
 							return (function() { 
 	var el_to_match = [String.fromCharCode(kc), kc];
 	if (get_type(el_to_match) == 'Array') {
-		if (typeof el_to_match[0] != 'undefined') {
-			if (typeof el_to_match[1] != 'undefined') {
-				if (38 == el_to_match[1]) {
-					return {active: "f"};
+		if (el_to_match.length == 2) {
+			if (38 == el_to_match[1]) {
+				return {active: "f"};
 
-				}
 			}
 		}
 	}
 
 	if (get_type(el_to_match) == 'Array') {
-		if (typeof el_to_match[0] != 'undefined') {
+		if (el_to_match.length == 2) {
 			if ("'" == el_to_match[0]) {
-				if (typeof el_to_match[1] != 'undefined') {
-					return {active: "f"};
+				return {active: "f"};
 
-				}
 			}
 		}
 	}
 
 	if (get_type(el_to_match) == 'Array') {
-		if (typeof el_to_match[0] != 'undefined') {
-			if (typeof el_to_match[1] != 'undefined') {
-				if (8 == el_to_match[1]) {
-					return {val: init(value)};
+		if (el_to_match.length == 2) {
+			if (8 == el_to_match[1]) {
+				return {val: init(value)};
 
-				}
 			}
 		}
 	}
 
 	if (get_type(el_to_match) == 'Array') {
-		if (typeof el_to_match[0] != 'undefined') {
+		if (el_to_match.length == 2) {
 			var c = el_to_match[0];
-			if (typeof el_to_match[1] != 'undefined') {
-				return {val: (function(a,b) { return a + b; })(value, c)};
+			return {val: (function(a,b) { return a + b; })(value, c)};
 
-			}
 		}
 	}})();
 
@@ -314,34 +297,28 @@ return el_ind;}})()};
 							return (function() { 
 	var el_to_match = [String.fromCharCode(kc), kc];
 	if (get_type(el_to_match) == 'Array') {
-		if (typeof el_to_match[0] != 'undefined') {
-			if (typeof el_to_match[1] != 'undefined') {
-				if (38 == el_to_match[1]) {
-					return {active: "f"};
+		if (el_to_match.length == 2) {
+			if (38 == el_to_match[1]) {
+				return {active: "f"};
 
-				}
 			}
 		}
 	}
 
 	if (get_type(el_to_match) == 'Array') {
-		if (typeof el_to_match[0] != 'undefined') {
-			if (typeof el_to_match[1] != 'undefined') {
-				if (8 == el_to_match[1]) {
-					return {val: init(value)};
+		if (el_to_match.length == 2) {
+			if (8 == el_to_match[1]) {
+				return {val: init(value)};
 
-				}
 			}
 		}
 	}
 
 	if (get_type(el_to_match) == 'Array') {
-		if (typeof el_to_match[0] != 'undefined') {
+		if (el_to_match.length == 2) {
 			if (is_num(el_to_match[0])) {
-				if (typeof el_to_match[1] != 'undefined') {
-					return {val: (function(a,b) { return a + b; })(value, String.fromCharCode(kc))};
+				return {val: (function(a,b) { return a + b; })(value, String.fromCharCode(kc))};
 
-				}
 			}
 		}
 	}})();
@@ -363,34 +340,28 @@ return el_ind;}})()};
 							return (function() { 
 	var el_to_match = [String.fromCharCode(kc), kc];
 	if (get_type(el_to_match) == 'Array') {
-		if (typeof el_to_match[0] != 'undefined') {
-			if (typeof el_to_match[1] != 'undefined') {
-				if (38 == el_to_match[1]) {
-					return {active: "f"};
+		if (el_to_match.length == 2) {
+			if (38 == el_to_match[1]) {
+				return {active: "f"};
 
-				}
 			}
 		}
 	}
 
 	if (get_type(el_to_match) == 'Array') {
-		if (typeof el_to_match[0] != 'undefined') {
-			if (typeof el_to_match[1] != 'undefined') {
-				if (8 == el_to_match[1]) {
-					return {val: init(value)};
+		if (el_to_match.length == 2) {
+			if (8 == el_to_match[1]) {
+				return {val: init(value)};
 
-				}
 			}
 		}
 	}
 
 	if (get_type(el_to_match) == 'Array') {
-		if (typeof el_to_match[0] != 'undefined') {
+		if (el_to_match.length == 2) {
 			var c = el_to_match[0];
-			if (typeof el_to_match[1] != 'undefined') {
-				return {val: (function(a,b) { return a + b; })(value, c)};
+			return {val: (function(a,b) { return a + b; })(value, c)};
 
-			}
 		}
 	}})();
 
@@ -413,10 +384,148 @@ return el_ind;}})()};
 })());
 };
 ;
-var root_node = gen_root();
-function update_view(ast) { 
+function render(node) { 
 
-return $("#ast").text(jsDump.parse(ast));
+return (function() { 
+	var el_to_match = node;
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
+			if ("List" == el_to_match.t) {
+				if ('els' in el_to_match) {
+					var elems = el_to_match.els;
+					if ('sel_el' in el_to_match) {
+						var sel_ind = el_to_match.sel_el;
+						if ('active' in el_to_match) {
+							var act = el_to_match.active;
+							return str(["(", join(" ", map(render, elems)), ")"]);
+
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
+			if ("Arr" == el_to_match.t) {
+				if ('els' in el_to_match) {
+					var elems = el_to_match.els;
+					if ('sel_el' in el_to_match) {
+						var sel_ind = el_to_match.sel_el;
+						return str(["[", join(" ", map(render, elems)), "]"]);
+
+					}
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
+			if ("Obj" == el_to_match.t) {
+				if ('els' in el_to_match) {
+					var elems = el_to_match.els;
+					if ('sel_el' in el_to_match) {
+						var sel_ind = el_to_match.sel_el;
+						return str(["{ ", join(" ", map(render, elems)), " }"]);
+
+					}
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
+			if ("Pair" == el_to_match.t) {
+				if ('els' in el_to_match) {
+					if (get_type(el_to_match.els) == 'Array') {
+						if (el_to_match.els.length == 2) {
+							var k = el_to_match.els[0];
+							var v = el_to_match.els[1];
+							return str([render(k), ": ", render(v)]);
+
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
+			if ("Num" == el_to_match.t) {
+				if ('val' in el_to_match) {
+					var value = el_to_match.val;
+					if ('active' in el_to_match) {
+						var act = el_to_match.active;
+						return render_active(value, act);
+
+					}
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
+			if ("Str" == el_to_match.t) {
+				if ('val' in el_to_match) {
+					var value = el_to_match.val;
+					if ('active' in el_to_match) {
+						var act = el_to_match.active;
+						return str(["'", render_active(value, act), "'"]);
+
+					}
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
+			if ("Atom" == el_to_match.t) {
+				if ('val' in el_to_match) {
+					var value = el_to_match.val;
+					if ('active' in el_to_match) {
+						var act = el_to_match.active;
+						return render_active(value, act);
+
+					}
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
+			if ("pending" == el_to_match.t) {
+				if ('active' in el_to_match) {
+					var act = el_to_match.active;
+					return render_active("...", act);
+
+				}
+			}
+		}
+	}})();
+};
+function render_active(s, is_active) { 
+
+return (function() { 
+if ((function(a,b) { return a == b; })(is_active, "t")) { 
+return wrap_span(s, "active");} else { 
+return s;}})();
+};
+function wrap_span(cont, cl) { 
+
+return str(["<span class='", cl, "'>", cont, "</span>"]);
+};
+;
+var root_node = gen_root();
+function update_view(node) { 
+$("#ast").text(jsDump.parse(node))
+return $("#rendered").html(render(node));
 };
 function handle_keydown(handler, key_event) { 
 

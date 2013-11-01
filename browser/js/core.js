@@ -97,10 +97,9 @@ return (function() {
 	}
 
 	if (get_type(el_to_match) == 'Array') {
-		if (el_to_match.length == 2) {
+		if (el_to_match.length == 1) {
 			var x = el_to_match[0];
-			var y = el_to_match[1];
-			return str([x, s, y]);
+			return (function(a,b) { return a + b; })("", x);
 
 		}
 	}
