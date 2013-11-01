@@ -29,77 +29,74 @@
 
 (defn like_list el (any (== el _) ["List" "Arr" "Obj" "Pair"]))
 
-(defn is_num el (any (== el _) (map (fn n (.toString n)) (range 0 9))))
-
 (defn contains_active_elem els (any is_active els))
 
 (defn contains_active_type type
 	(any (fn el (&& (== (#t el) type) (is_active el))) _))
 
+//TODO: fix these
 (defn contains_active_atom (contains_active_type "Atom"))
 (defn contains_active_str  (contains_active_type "Str"))
 (defn contains_active_num  (contains_active_type "Num"))
 (defn contains_active_num  (contains_active_type "List"))
 
-(defn get_triggered_keycodes node kc
-	(match [kc (.fromCharCode String kc) node]
-		([32 _   {t: "List" active: "t" els: (contains_active_atom)}] [38 32])
-		([32 _   {t: "List" active: "t" els: (contains_active_num)}]  [38 32])
-		([_  "'" {t: "List" active: "t" els: (contains_active_str)}]  [38 32])
+(defn get_triggered_input node input
+	(match [input node]
+		([" " {t: "List" active: "t" els: (contains_active_atom)}] ["uarr" " "])
+		([" " {t: "List" active: "t" els: (contains_active_num)}]  ["uarr" " "])
+		(["'" {t: "List" active: "t" els: (contains_active_str)}]  ["uarr" " "])
 
-		([46 _   {t: "List" active: "t" els: (contains_active_atom)}] [38 46 40])
+		(["del" {t: "List" active: "t" els: (contains_active_atom)}] ["uarr" "del" "darr"])
 
-		(_ [kc])
+		(_ [input])
 ))
 
-(defn update_node node kc
+(defn update_node node input
 	(merge node (match node
 
 		({t: (like_list) active: "t" els: (contains_active_elem) sel_el: el_ind}
-			{ els: (map (update_node _ kc) (#els node)) })
+			{ els: (map (update_node _ input) (#els node)) })
 
 		({t: (like_list) active: "t" els: elems sel_el: el_ind}
-			(match kc
-				(37 { sel_el: (dec el_ind) })
-				(39 { sel_el: (inc el_ind) })
-				(38 { active: "f" })
-				(40 { els: (activate_nth el_ind elems) })
-				(46 { els: (remove_nth   el_ind elems) sel_el: (if (== (#length elems) (inc el_ind)) (dec el_ind) el_ind) })
-				(32 { els: (concat (deactivate_all elems) (activate (gen_pending))) sel_el: (inc el_ind) })
+			(match input
+				("larr" { sel_el: (dec el_ind) })
+				("rarr" { sel_el: (inc el_ind) })
+				("uarr" { active: "f" })
+				("darr" { els: (activate_nth el_ind elems) })
+				("del"  { els: (remove_nth   el_ind elems) sel_el: (if (== (#length elems) (inc el_ind)) (dec el_ind) el_ind) })
+				(" "    { els: (concat (deactivate_all elems) (activate (gen_pending))) sel_el: (inc el_ind) })
 				(_  {})))
 
 		({t: "pending" active: "t"}
-			(match (.fromCharCode String kc)
-				("'"      { t: "Str"  val: "" })
-				("["      { t: "Arr"  els: [(activate (gen_pending))] sel_el: 0 })
-				("("      { t: "List" els: [(activate (gen_pending))] sel_el: 0 })
-				("{"      { t: "Obj"  els: [(activate (gen_pending))] sel_el: 0 })
-				(":"      { t: "Pair" els: [(activate { t: "Atom" val: "" }) (gen_pending)] sel_el: 0 })
-				((is_num) { t: "Num"  val: (.fromCharCode String kc) })
-				(c        { t: "Atom" val: c })))
+			(match input
+				("'"       { t: "Str"  val: "" })
+				("["       { t: "Arr"  els: [(activate (gen_pending))] sel_el: 0 })
+				("("       { t: "List" els: [(activate (gen_pending))] sel_el: 0 })
+				("{"       { t: "Obj"  els: [(activate (gen_pending))] sel_el: 0 })
+				(":"       { t: "Pair" els: [(activate { t: "Atom" val: "" }) (gen_pending)] sel_el: 0 })
+				((is_num)  { t: "Num"  val: input })
+				((is_atom) { t: "Atom" val: input })))
 
 		({t: "Str" active: "t" val: value}
-			(match [(.fromCharCode String kc) kc]
-				([_  38] { active: "f" })
-				(["'" _] { active: "f" })
-				([_   8] { val: (init value) })
-				([c   _] { val: (+ value c) })))
+			(match input
+				("uarr" { active: "f" })
+				("'"    { active: "f" })
+				("bs"   { val: (init value) })
+				(c      { val: (+ value c) })))
 
 		({t: "Num" active: "t" val: value}
-			(match [(.fromCharCode String kc) kc]
-				([_       38] { active: "f" })
-				([_        8] { val: (init value) })
-				([(is_num) _] { val: (+ value (.fromCharCode String kc)) })))
+			(match input
+				("uarr"   { active: "f" })
+				("bs"     { val: (init value) })
+				((is_num) { val: (+ value input) })))
 
 		({t: "Atom" active: "t" val: value}
-			(match [(.fromCharCode String kc) kc]
-				([_   38] { active: "f" })
-				([_    8] { val: (init value) })
-				([c    _] { val: (+ value c) })))
+			(match input
+				("uarr"    { active: "f" })
+				("bs"      { val: (init value) })
+				((is_atom) { val: (+ value input) })))
 
-		(_ (match kc
-		 	(38 { active: "f" })
-		 	(_  {})))
+		(_ {})
 	))
 )
 
@@ -147,22 +144,47 @@
 	(.html ($ "#rendered") (render node)))
 )
 
-(defn handle_keydown handler key_event
-	(if (any (== (#which key_event) _) [8 37 39 38 40 46])
-		(handler (#which key_event))
-		undefined))
-
-(defn handle_keypress handler key_event
-	(handler (#which key_event)))
-
-(defn update node keycode (
-	(set root_node (update_node_multi node (get_triggered_keycodes node keycode)))
+(defn update node input (
+	(set root_node (update_node_multi node (get_triggered_input node input)))
 	(update_view root_node)
 ))
 
+
+//input handling
+
+(def special_input [
+	[8  "bs"]
+	[37 "larr"]
+	[38 "uarr"]
+	[39 "rarr"]
+	[40 "darr"]
+	[46 "del"]
+])
+
+(defn is_num input (any (== input _) (map (fn n (.toString n)) (range 0 9))))
+
+(defn is_atom input (! (any (fn pair (match pair ([_ s] (== s input)))) special_input)))
+
+
+//make sure input only triggers one of the two possible events and normalize keycode to string/char
+
+(defn handle_keydown handler key_event
+	(match (kd_keycode_to_s special_input (#which key_event))
+		("not_matched" undefined)
+		(s (handler s))))
+
+(defn kd_keycode_to_s pairs kc
+	(match (find (fn pair (match pair ([code s] (== code kc)))) pairs)
+		("undefined" "not_matched")
+		([_ s] s)
+))
+
+(defn handle_keypress handler key_event
+	(handler (.fromCharCode String (#which key_event))))
+
 (.ready ($ document) (fn (
 
-	(update root_node 40) //activate first child
+	(update root_node "darr") //activate first child
 
 	(.keydown  ($ "#input") (handle_keydown  (update root_node _) _))
 	(.keypress ($ "#input") (handle_keypress (update root_node _) _))
