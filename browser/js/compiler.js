@@ -87,19 +87,23 @@ function gen_patt_info(patt, el, el_accessor) {
 		case "List":   return [{type: 'Cond', cond: compile({ type: "List", elements: patt.elements.concat({ type: "Atom", name: comp_el }) }) }];
 		case "Array":
 			var res = [{type: 'Cond', cond: 'get_type(' + comp_el + ") == 'Array'"}];
-			if (patt.elements.length < 1) {
-				res.push({type: 'Cond', cond: "0 == " + comp_el + ".length"});
-			} else {
-				for (var i = 0; i < patt.elements.length; i++) {
-					if (patt.elements[i].type == 'Atom' && patt.elements[i].name == '&') {  //bind the rest of the array to the next element in the pattern
-						res.push({type: 'Decl', name: patt.elements[i + 1].name, value: comp_el + '.slice(' + i + ')'})
-						break;
-					}
 
-					var new_accessor = el_accessor + '[' + i + ']';
-					res.push({type: 'Cond', cond: "typeof " + el + new_accessor + " != 'undefined'"});
-					res.push(gen_patt_info(patt.elements[i], el, new_accessor));
-				};
+			var match_rest = _.find(patt.elements, function(el) { return el.type == 'Atom' && el.name == '&'; });
+			if (!match_rest) { //match length
+				res.push({type: 'Cond', cond: comp_el + ".length == " + patt.elements.length});
+			} 
+
+			for (var i = 0; i < patt.elements.length; i++) {
+				if (patt.elements[i].type == 'Atom' && patt.elements[i].name == '&') {  //bind the rest of the array to the next element in the pattern
+					res.push({type: 'Decl', name: patt.elements[i + 1].name, value: comp_el + '.slice(' + i + ')'})
+					break;
+				}
+
+				var new_accessor = el_accessor + '[' + i + ']';
+				if (match_rest) { //array length hasn't been tested
+					res.push({type: 'Cond', cond: "typeof " + el + new_accessor + " != 'undefined'"});	
+				}
+				res.push(gen_patt_info(patt.elements[i], el, new_accessor));
 			}
 			
 			return _.flatten(res);
