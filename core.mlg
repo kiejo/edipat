@@ -43,6 +43,12 @@
 				 true
 				(any f rest)))))
 
+(defn find f xs (match xs
+	([] "undefined")
+	([x & rest] (if (f x)
+				 x
+				(find f rest)))))
+
 (defn join s xs (match xs
 	([]          "")
 	([x]         (+ "" x))
