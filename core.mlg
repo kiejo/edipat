@@ -43,6 +43,11 @@
 				 true
 				(any f rest)))))
 
+(defn join s xs (match xs
+	([]          "")
+	([x y]      (str [x s y]))
+	([x & rest] (str [x s (join s rest)]))))
+
 (defn inc a (+ a 1))
 (defn dec a (- a 1))
 

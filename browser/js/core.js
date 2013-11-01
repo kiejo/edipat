@@ -67,7 +67,7 @@ function any(f, xs) {
 return (function() { 
 	var el_to_match = xs;
 	if (get_type(el_to_match) == 'Array') {
-		if (0 == el_to_match.length) {
+		if (el_to_match.length == 0) {
 			return false;
 
 		}
@@ -81,6 +81,35 @@ return (function() {
 if (f(x)) { 
 return true;} else { 
 return any(f, rest);}})();
+
+		}
+	}})();
+};
+function join(s, xs) { 
+
+return (function() { 
+	var el_to_match = xs;
+	if (get_type(el_to_match) == 'Array') {
+		if (el_to_match.length == 0) {
+			return "";
+
+		}
+	}
+
+	if (get_type(el_to_match) == 'Array') {
+		if (el_to_match.length == 2) {
+			var x = el_to_match[0];
+			var y = el_to_match[1];
+			return str([x, s, y]);
+
+		}
+	}
+
+	if (get_type(el_to_match) == 'Array') {
+		if (typeof el_to_match[0] != 'undefined') {
+			var x = el_to_match[0];
+			var rest = el_to_match.slice(1);
+			return str([x, s, join(s, rest)]);
 
 		}
 	}})();
