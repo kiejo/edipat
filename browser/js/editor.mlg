@@ -1,9 +1,18 @@
 //form generators
 
-(defn gen_root { t: "List" els: [(gen_pending)] active: "t" sel_el: 0 } )
+(defn gen_root { t: "List" els: [(gen_pending "...")] active: "t" sel_el: 0 } )
 
-(defn gen_pending { t: "pending" })
+(defn gen_type_with_val type value { t: type val: value })
+(def gen_pending (gen_type_with_val "pending" _))
+(def gen_atom    (gen_type_with_val "Atom" _))
+(def gen_num     (gen_type_with_val "Num" _))
+(def gen_str     (gen_type_with_val "Str" _))
 
+(defn gen_type_with_els type els { t: type els: els sel_el: 0 })
+(def gen_list (gen_type_with_els "List" _))
+(def gen_arr  (gen_type_with_els "Arr" _))
+(def gen_obj  (gen_type_with_els "Obj" _))
+(def gen_pair (gen_type_with_els "Pair" _))
 
 //helper methods
 
@@ -36,6 +45,7 @@
 
 (defn get_triggered_input node input
 	(match [input node]
+
 		([" " {t: (like_list) active: "t" els: (contains_active_type "Atom" _)}] ["uarr" " "])
 		([" " {t: (like_list) active: "t" els: (contains_active_type "Num" _)}]  ["uarr" " "])
 		(["'" {t: (like_list) active: "t" els: (contains_active_type "Str" _)}]  ["uarr" " "])
@@ -44,6 +54,8 @@
 		(["rarr" {t: (like_list) active: "t" els: (contains_active_type "Atom" _)}] ["uarr" "rarr" "darr"])
 
 		(["del" {t: (like_list) active: "t" els: (contains_active_type "Atom" _)}] ["uarr" "del" "darr"])
+
+		(["del" {t: (like_list) active: "t" els: (contains_active_type "pending" _)}] ["uarr" "del" "darr"])
 
 		([_ {t: (like_list) active: "t" els: (contains_active_elem) sel_el: el_ind}]
 			(get_triggered_input (nth el_ind (#els node)) input))
@@ -64,18 +76,19 @@
 				("uarr" { active: "f" })
 				("darr" { els: (activate_nth el_ind elems) })
 				("del"  { els: (remove_nth   el_ind elems) sel_el: (if (== (#length elems) (inc el_ind)) (dec el_ind) el_ind) })
-				(" "    { els: (insert_at (inc el_ind) (activate (gen_pending)) (deactivate_all elems)) sel_el: (inc el_ind) })
+				(" "    { els: (insert_at (inc el_ind) (activate (gen_pending "...")) (deactivate_all elems)) sel_el: (inc el_ind) })
 				(_  {})))
 
 		({t: "pending" active: "t"}
 			(match input
-				("'"       { t: "Str"  val: "" })
-				("["       { t: "Arr"  els: [(activate (gen_pending))] sel_el: 0 })
-				("("       { t: "List" els: [(activate (gen_pending))] sel_el: 0 })
-				("{"       { t: "Obj"  els: [(activate (gen_pending))] sel_el: 0 })
-				(":"       { t: "Pair" els: [(activate { t: "Atom" val: "" }) (gen_pending)] sel_el: 0 })
-				((is_num)  { t: "Num"  val: input })
-				((is_atom) { t: "Atom" val: input })))
+				("uarr"    { active: "f" })
+				("'"       (gen_str ""))
+				("["       (gen_arr  [(activate (gen_pending "el"))]))
+				("("       (gen_list [(activate (gen_pending "el"))]))
+				("{"       (gen_obj  [(activate (gen_pending "el"))]))
+				(":"       (gen_obj  [(activate (gen_atom "")) (gen_pending "el")]))
+				((is_num)  (gen_num input))
+				((is_atom) (gen_atom input))))
 
 		({t: "Str" active: "t" val: value}
 			(match input
@@ -103,27 +116,60 @@
 (defn update_node_multi node keycodes
 	(foldl node update_node keycodes))
 
+(defn post_triggers node
+	(merge node (match node
+		({t: "List" active: "t" els: [ { t: "Atom" val: fn_name active: "t" } ]}
+			(match (get_form fn_name special_forms)
+				("undefined" {})
+				({gen: items} { els: (.concat (#els node) items) })))
+
+		({t: (like_list) active: "t" els: (contains_active_elem)}
+			{ els: (map (post_triggers _) (#els node)) })
+
+		(_ {})
+	))
+)
+
+//special forms
+(def special_forms [
+	{ name: "def"  gen: [ (gen_atom "name") (gen_pending "value") ] }
+	{ name: "set"  gen: [ (gen_atom "name") (gen_pending "value") ] }
+	{ name: "defn" gen: [ (gen_atom "name") (gen_atom "arg1") (gen_pending "body") ] }
+	{ name: "fn"   gen: [ (gen_atom "arg1")  (gen_pending "body") ] }
+	{ name: "if"   gen: [ (gen_pending "cond") (gen_pending "else") (gen_pending "else") ] }
+	{ name: "nth"  gen: [ { t: "Num"  val: "index" } (gen_pending "array") ] }
+
+	{ name: "match" gen: [ (gen_pending "value") (gen_list [ (gen_pending "patt") (gen_pending "expr")]) ] }
+])
+
+(defn get_form name forms
+	(find (fn form (match form
+					({name: (== name _)} true)
+					(_ false)))
+		  forms))
+
+
 //renderer
 
 (defn render node (match node
-	({t: "List" els: elems sel_el: sel_ind active: act}
+	({t: "List" els: elems}
 		(str ["(" (join " " (map render elems)) ")"]))
 
-	({t: "Arr" els: elems sel_el: sel_ind}
+	({t: "Arr" els: elems}
 		(str ["[" (join " " (map render elems)) "]"]))
 
-	({t: "Obj" els: elems sel_el: sel_ind}
+	({t: "Obj" els: elems}
 		(str ["{ " (join " " (map render elems)) " }"]))
 
 	({t: "Pair" els: [k v]} (str [(render k) ": " (render v)]))
 
-	({t: "Num" val: value  active: act} (render_active value act))
+	({t: "Num" val: value} (render_active value (#active node)))
 
-	({t: "Str" val: value  active: act} (str ["'" (render_active value act) "'"]))
+	({t: "Str" val: value} (str ["'" (render_active value (#active node)) "'"]))
 
-	({t: "Atom" val: value  active: act} (render_active value act))
+	({t: "Atom" val: value} (render_active value (#active node)))
 
-	({t: "pending" active: act} (render_active "..." act))
+	({t: "pending" val: value} (render_active value (#active node)))
 
 ))
 
@@ -145,7 +191,7 @@
 )
 
 (defn update node input (do
-	(set root_node (update_node_multi node (get_triggered_input node input)))
+	(set root_node (post_triggers (update_node_multi node (get_triggered_input node input))))
 	(update_view root_node)
 ))
 
@@ -157,6 +203,7 @@
 	[37 "larr"]
 	[38 "uarr"]
 	[39 "rarr"]
+	[9  "rarr"]
 	[40 "darr"]
 	[46 "del"]
 ])

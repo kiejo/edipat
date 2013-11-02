@@ -1,12 +1,24 @@
 ;
 function gen_root() { 
 
-return {t: "List", els: [gen_pending()], active: "t", sel_el: 0};
+return {t: "List", els: [gen_pending("...")], active: "t", sel_el: 0};
 };
-function gen_pending() { 
+function gen_type_with_val(type, value) { 
 
-return {t: "pending"};
+return {t: type, val: value};
 };
+var gen_pending = (function(__partial_arg_1) { return gen_type_with_val("pending", __partial_arg_1)});
+var gen_atom = (function(__partial_arg_1) { return gen_type_with_val("Atom", __partial_arg_1)});
+var gen_num = (function(__partial_arg_1) { return gen_type_with_val("Num", __partial_arg_1)});
+var gen_str = (function(__partial_arg_1) { return gen_type_with_val("Str", __partial_arg_1)});
+function gen_type_with_els(type, els) { 
+
+return {t: type, els: els, sel_el: 0};
+};
+var gen_list = (function(__partial_arg_1) { return gen_type_with_els("List", __partial_arg_1)});
+var gen_arr = (function(__partial_arg_1) { return gen_type_with_els("Arr", __partial_arg_1)});
+var gen_obj = (function(__partial_arg_1) { return gen_type_with_els("Obj", __partial_arg_1)});
+var gen_pair = (function(__partial_arg_1) { return gen_type_with_els("Pair", __partial_arg_1)});
 ;
 function activate(node) { 
 
@@ -275,6 +287,29 @@ return (function() {
 
 	if (get_type(el_to_match) == 'Array') {
 		if (el_to_match.length == 2) {
+			if ("del" == el_to_match[0]) {
+				if (get_type(el_to_match[1]) == 'Object') {
+					if ('t' in el_to_match[1]) {
+						if (like_list(el_to_match[1].t)) {
+							if ('active' in el_to_match[1]) {
+								if ("t" == el_to_match[1].active) {
+									if ('els' in el_to_match[1]) {
+										if (((function(__partial_arg_1) { return contains_active_type("pending", __partial_arg_1)}))(el_to_match[1].els)) {
+											return ["uarr", "del", "darr"];
+
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Array') {
+		if (el_to_match.length == 2) {
 			if (get_type(el_to_match[1]) == 'Object') {
 				if ('t' in el_to_match[1]) {
 					if (like_list(el_to_match[1].t)) {
@@ -364,7 +399,7 @@ return el_ind;}})()};
 	}
 
 	if (" " == el_to_match) {
-		return {els: insert_at(inc(el_ind), activate(gen_pending()), deactivate_all(elems)), sel_el: inc(el_ind)};
+		return {els: insert_at(inc(el_ind), activate(gen_pending("...")), deactivate_all(elems)), sel_el: inc(el_ind)};
 
 	}
 
@@ -386,38 +421,43 @@ return el_ind;}})()};
 					if ("t" == el_to_match.active) {
 						return (function() { 
 	var el_to_match = input;
+	if ("uarr" == el_to_match) {
+		return {active: "f"};
+
+	}
+
 	if ("'" == el_to_match) {
-		return {t: "Str", val: ""};
+		return gen_str("");
 
 	}
 
 	if ("[" == el_to_match) {
-		return {t: "Arr", els: [activate(gen_pending())], sel_el: 0};
+		return gen_arr([activate(gen_pending("el"))]);
 
 	}
 
 	if ("(" == el_to_match) {
-		return {t: "List", els: [activate(gen_pending())], sel_el: 0};
+		return gen_list([activate(gen_pending("el"))]);
 
 	}
 
 	if ("{" == el_to_match) {
-		return {t: "Obj", els: [activate(gen_pending())], sel_el: 0};
+		return gen_obj([activate(gen_pending("el"))]);
 
 	}
 
 	if (":" == el_to_match) {
-		return {t: "Pair", els: [activate({t: "Atom", val: ""}), gen_pending()], sel_el: 0};
+		return gen_obj([activate(gen_atom("")), gen_pending("el")]);
 
 	}
 
 	if (is_num(el_to_match)) {
-		return {t: "Num", val: input};
+		return gen_num(input);
 
 	}
 
 	if (is_atom(el_to_match)) {
-		return {t: "Atom", val: input};
+		return gen_atom(input);
 
 	}})();
 
@@ -531,6 +571,96 @@ function update_node_multi(node, keycodes) {
 
 return foldl(node, update_node, keycodes);
 };
+function post_triggers(node) { 
+
+return merge(node, (function() { 
+	var el_to_match = node;
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
+			if ("List" == el_to_match.t) {
+				if ('active' in el_to_match) {
+					if ("t" == el_to_match.active) {
+						if ('els' in el_to_match) {
+							if (get_type(el_to_match.els) == 'Array') {
+								if (el_to_match.els.length == 1) {
+									if (get_type(el_to_match.els[0]) == 'Object') {
+										if ('t' in el_to_match.els[0]) {
+											if ("Atom" == el_to_match.els[0].t) {
+												if ('val' in el_to_match.els[0]) {
+													var fn_name = el_to_match.els[0].val;
+													if ('active' in el_to_match.els[0]) {
+														if ("t" == el_to_match.els[0].active) {
+															return (function() { 
+	var el_to_match = get_form(fn_name, special_forms);
+	if ("undefined" == el_to_match) {
+		return {};
+
+	}
+
+	if (get_type(el_to_match) == 'Object') {
+		if ('gen' in el_to_match) {
+			var items = el_to_match.gen;
+			return {els: node.els.concat(items)};
+
+		}
+	}})();
+
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
+			if (like_list(el_to_match.t)) {
+				if ('active' in el_to_match) {
+					if ("t" == el_to_match.active) {
+						if ('els' in el_to_match) {
+							if (contains_active_elem(el_to_match.els)) {
+								return {els: map((function(__partial_arg_0) { return post_triggers(__partial_arg_0)}), node.els)};
+
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return {};
+})());
+};
+;
+var special_forms = [{name: "def", gen: [gen_atom("name"), gen_pending("value")]}, {name: "set", gen: [gen_atom("name"), gen_pending("value")]}, {name: "defn", gen: [gen_atom("name"), gen_atom("arg1"), gen_pending("body")]}, {name: "fn", gen: [gen_atom("arg1"), gen_pending("body")]}, {name: "if", gen: [gen_pending("cond"), gen_pending("else"), gen_pending("else")]}, {name: "nth", gen: [{t: "Num", val: "index"}, gen_pending("array")]}, {name: "match", gen: [gen_pending("value"), gen_list([gen_pending("patt"), gen_pending("expr")])]}];
+function get_form(name, forms) { 
+
+return find(function (form) { 
+
+return (function() { 
+	var el_to_match = form;
+	if (get_type(el_to_match) == 'Object') {
+		if ('name' in el_to_match) {
+			if (((function(__partial_arg_1) { return (function(a,b) { return a == b; })(name, __partial_arg_1)}))(el_to_match.name)) {
+				return true;
+
+			}
+		}
+	}
+
+	return false;
+})();
+}, forms);
+};
 ;
 function render(node) { 
 
@@ -541,14 +671,8 @@ return (function() {
 			if ("List" == el_to_match.t) {
 				if ('els' in el_to_match) {
 					var elems = el_to_match.els;
-					if ('sel_el' in el_to_match) {
-						var sel_ind = el_to_match.sel_el;
-						if ('active' in el_to_match) {
-							var act = el_to_match.active;
-							return str(["(", join(" ", map(render, elems)), ")"]);
+					return str(["(", join(" ", map(render, elems)), ")"]);
 
-						}
-					}
 				}
 			}
 		}
@@ -559,11 +683,8 @@ return (function() {
 			if ("Arr" == el_to_match.t) {
 				if ('els' in el_to_match) {
 					var elems = el_to_match.els;
-					if ('sel_el' in el_to_match) {
-						var sel_ind = el_to_match.sel_el;
-						return str(["[", join(" ", map(render, elems)), "]"]);
+					return str(["[", join(" ", map(render, elems)), "]"]);
 
-					}
 				}
 			}
 		}
@@ -574,11 +695,8 @@ return (function() {
 			if ("Obj" == el_to_match.t) {
 				if ('els' in el_to_match) {
 					var elems = el_to_match.els;
-					if ('sel_el' in el_to_match) {
-						var sel_ind = el_to_match.sel_el;
-						return str(["{ ", join(" ", map(render, elems)), " }"]);
+					return str(["{ ", join(" ", map(render, elems)), " }"]);
 
-					}
 				}
 			}
 		}
@@ -606,11 +724,8 @@ return (function() {
 			if ("Num" == el_to_match.t) {
 				if ('val' in el_to_match) {
 					var value = el_to_match.val;
-					if ('active' in el_to_match) {
-						var act = el_to_match.active;
-						return render_active(value, act);
+					return render_active(value, node.active);
 
-					}
 				}
 			}
 		}
@@ -621,11 +736,8 @@ return (function() {
 			if ("Str" == el_to_match.t) {
 				if ('val' in el_to_match) {
 					var value = el_to_match.val;
-					if ('active' in el_to_match) {
-						var act = el_to_match.active;
-						return str(["'", render_active(value, act), "'"]);
+					return str(["'", render_active(value, node.active), "'"]);
 
-					}
 				}
 			}
 		}
@@ -636,11 +748,8 @@ return (function() {
 			if ("Atom" == el_to_match.t) {
 				if ('val' in el_to_match) {
 					var value = el_to_match.val;
-					if ('active' in el_to_match) {
-						var act = el_to_match.active;
-						return render_active(value, act);
+					return render_active(value, node.active);
 
-					}
 				}
 			}
 		}
@@ -649,9 +758,9 @@ return (function() {
 	if (get_type(el_to_match) == 'Object') {
 		if ('t' in el_to_match) {
 			if ("pending" == el_to_match.t) {
-				if ('active' in el_to_match) {
-					var act = el_to_match.active;
-					return render_active("...", act);
+				if ('val' in el_to_match) {
+					var value = el_to_match.val;
+					return render_active(value, node.active);
 
 				}
 			}
@@ -681,12 +790,12 @@ return $("#rendered").html(render(node));
 function update(node, input) { 
 
 return (function() { 
-root_node = update_node_multi(node, get_triggered_input(node, input));
+root_node = post_triggers(update_node_multi(node, get_triggered_input(node, input)));
 return update_view(root_node);
 })();
 };
 ;
-var special_input = [[8, "bs"], [37, "larr"], [38, "uarr"], [39, "rarr"], [40, "darr"], [46, "del"]];
+var special_input = [[8, "bs"], [37, "larr"], [38, "uarr"], [39, "rarr"], [9, "rarr"], [40, "darr"], [46, "del"]];
 function is_num(input) { 
 
 return any((function(__partial_arg_1) { return (function(a,b) { return a == b; })(input, __partial_arg_1)}), map(function (n) { 
