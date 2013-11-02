@@ -36,14 +36,17 @@
 
 (defn get_triggered_input node input
 	(match [input node]
-		([" " {t: "List" active: "t" els: (contains_active_type "Atom" _)}] ["uarr" " "])
-		([" " {t: "List" active: "t" els: (contains_active_type "Num" _)}]  ["uarr" " "])
-		(["'" {t: "List" active: "t" els: (contains_active_type "Str" _)}]  ["uarr" " "])
+		([" " {t: (like_list) active: "t" els: (contains_active_type "Atom" _)}] ["uarr" " "])
+		([" " {t: (like_list) active: "t" els: (contains_active_type "Num" _)}]  ["uarr" " "])
+		(["'" {t: (like_list) active: "t" els: (contains_active_type "Str" _)}]  ["uarr" " "])
 
-		(["larr" {t: "List" active: "t" els: (contains_active_type "Atom" _)}] ["uarr" "larr" "darr"])
-		(["rarr" {t: "List" active: "t" els: (contains_active_type "Atom" _)}] ["uarr" "rarr" "darr"])
+		(["larr" {t: (like_list) active: "t" els: (contains_active_type "Atom" _)}] ["uarr" "larr" "darr"])
+		(["rarr" {t: (like_list) active: "t" els: (contains_active_type "Atom" _)}] ["uarr" "rarr" "darr"])
 
-		(["del" {t: "List" active: "t" els: (contains_active_type "Atom" _)}] ["uarr" "del" "darr"])
+		(["del" {t: (like_list) active: "t" els: (contains_active_type "Atom" _)}] ["uarr" "del" "darr"])
+
+		([_ {t: (like_list) active: "t" els: (contains_active_elem) sel_el: el_ind}]
+			(get_triggered_input (nth el_ind (#els node)) input))
 
 		(_ [input])
 ))
