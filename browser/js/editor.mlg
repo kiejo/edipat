@@ -40,24 +40,18 @@
 
 (defn contains_active_elem els (any is_active els))
 
-(defn contains_active_type type els
-	(any (fn el (&& (== (#t el) type) (is_active el))) els))
+(defn contains_active_type types els
+	(any (fn el (&& (is_active el) (any (== (#t el) _) types))) els))
 
 (defn get_triggered_input node input
 	(match [input node]
 
-		([" " {t: (like_list) active: "t" els: (contains_active_type "Atom" _)}] ["uarr" " "])
-		([" " {t: (like_list) active: "t" els: (contains_active_type "Num" _)}]  ["uarr" " "])
-		(["'" {t: (like_list) active: "t" els: (contains_active_type "Str" _)}]  ["uarr" " "])
+		([" " {t: (like_list) active: "t" els: (contains_active_type ["Atom" "Num"] _)}] ["uarr" " "])
+		(["'" {t: (like_list) active: "t" els: (contains_active_type ["Str"] _)}]        ["uarr" " "])
 
-		(["larr" {t: (like_list) active: "t" els: (contains_active_type "Atom" _)}] ["uarr" "larr" "darr"])
-		(["rarr" {t: (like_list) active: "t" els: (contains_active_type "Atom" _)}] ["uarr" "rarr" "darr"])
-
-		(["del" {t: (like_list) active: "t" els: (contains_active_type "Atom" _)}] ["uarr" "del" "darr"])
-
-		(["larr" {t: (like_list) active: "t" els: (contains_active_type "pending" _)}] ["uarr" "larr" "darr"])
-		(["rarr" {t: (like_list) active: "t" els: (contains_active_type "pending" _)}] ["uarr" "rarr" "darr"])
-		(["del"  {t: (like_list) active: "t" els: (contains_active_type "pending" _)}] ["uarr" "del"  "darr"])
+		(["larr" {t: (like_list) active: "t" els: (contains_active_type ["Atom" "Num" "Str" "pending"] _)}] ["uarr" "larr" "darr"])
+		(["rarr" {t: (like_list) active: "t" els: (contains_active_type ["Atom" "Num" "Str" "pending"] _)}] ["uarr" "rarr" "darr"])
+		(["del"  {t: (like_list) active: "t" els: (contains_active_type ["Atom" "Num" "Str" "pending"] _)}] ["uarr" "del"  "darr"])
 
 		([_ {t: (like_list) active: "t" els: (contains_active_elem) sel_el: el_ind}]
 			(get_triggered_input (nth el_ind (#els node)) input))

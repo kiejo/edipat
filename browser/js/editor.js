@@ -136,11 +136,11 @@ function contains_active_elem(els) {
 
 return any(is_active, els);
 };
-function contains_active_type(type, els) { 
+function contains_active_type(types, els) { 
 
 return any(function (el) { 
 
-return (function(a,b) { return a && b; })((function(a,b) { return a == b; })(el.t, type), is_active(el));
+return (function(a,b) { return a && b; })(is_active(el), any((function(__partial_arg_1) { return (function(a,b) { return a == b; })(el.t, __partial_arg_1)}), types));
 }, els);
 };
 function get_triggered_input(node, input) { 
@@ -156,30 +156,7 @@ return (function() {
 							if ('active' in el_to_match[1]) {
 								if ("t" == el_to_match[1].active) {
 									if ('els' in el_to_match[1]) {
-										if (((function(__partial_arg_1) { return contains_active_type("Atom", __partial_arg_1)}))(el_to_match[1].els)) {
-											return ["uarr", " "];
-
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	if (get_type(el_to_match) == 'Array') {
-		if (el_to_match.length == 2) {
-			if (" " == el_to_match[0]) {
-				if (get_type(el_to_match[1]) == 'Object') {
-					if ('t' in el_to_match[1]) {
-						if (like_list(el_to_match[1].t)) {
-							if ('active' in el_to_match[1]) {
-								if ("t" == el_to_match[1].active) {
-									if ('els' in el_to_match[1]) {
-										if (((function(__partial_arg_1) { return contains_active_type("Num", __partial_arg_1)}))(el_to_match[1].els)) {
+										if (((function(__partial_arg_1) { return contains_active_type(["Atom", "Num"], __partial_arg_1)}))(el_to_match[1].els)) {
 											return ["uarr", " "];
 
 										}
@@ -202,7 +179,7 @@ return (function() {
 							if ('active' in el_to_match[1]) {
 								if ("t" == el_to_match[1].active) {
 									if ('els' in el_to_match[1]) {
-										if (((function(__partial_arg_1) { return contains_active_type("Str", __partial_arg_1)}))(el_to_match[1].els)) {
+										if (((function(__partial_arg_1) { return contains_active_type(["Str"], __partial_arg_1)}))(el_to_match[1].els)) {
 											return ["uarr", " "];
 
 										}
@@ -225,7 +202,7 @@ return (function() {
 							if ('active' in el_to_match[1]) {
 								if ("t" == el_to_match[1].active) {
 									if ('els' in el_to_match[1]) {
-										if (((function(__partial_arg_1) { return contains_active_type("Atom", __partial_arg_1)}))(el_to_match[1].els)) {
+										if (((function(__partial_arg_1) { return contains_active_type(["Atom", "Num", "Str", "pending"], __partial_arg_1)}))(el_to_match[1].els)) {
 											return ["uarr", "larr", "darr"];
 
 										}
@@ -248,7 +225,7 @@ return (function() {
 							if ('active' in el_to_match[1]) {
 								if ("t" == el_to_match[1].active) {
 									if ('els' in el_to_match[1]) {
-										if (((function(__partial_arg_1) { return contains_active_type("Atom", __partial_arg_1)}))(el_to_match[1].els)) {
+										if (((function(__partial_arg_1) { return contains_active_type(["Atom", "Num", "Str", "pending"], __partial_arg_1)}))(el_to_match[1].els)) {
 											return ["uarr", "rarr", "darr"];
 
 										}
@@ -271,76 +248,7 @@ return (function() {
 							if ('active' in el_to_match[1]) {
 								if ("t" == el_to_match[1].active) {
 									if ('els' in el_to_match[1]) {
-										if (((function(__partial_arg_1) { return contains_active_type("Atom", __partial_arg_1)}))(el_to_match[1].els)) {
-											return ["uarr", "del", "darr"];
-
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	if (get_type(el_to_match) == 'Array') {
-		if (el_to_match.length == 2) {
-			if ("larr" == el_to_match[0]) {
-				if (get_type(el_to_match[1]) == 'Object') {
-					if ('t' in el_to_match[1]) {
-						if (like_list(el_to_match[1].t)) {
-							if ('active' in el_to_match[1]) {
-								if ("t" == el_to_match[1].active) {
-									if ('els' in el_to_match[1]) {
-										if (((function(__partial_arg_1) { return contains_active_type("pending", __partial_arg_1)}))(el_to_match[1].els)) {
-											return ["uarr", "larr", "darr"];
-
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	if (get_type(el_to_match) == 'Array') {
-		if (el_to_match.length == 2) {
-			if ("rarr" == el_to_match[0]) {
-				if (get_type(el_to_match[1]) == 'Object') {
-					if ('t' in el_to_match[1]) {
-						if (like_list(el_to_match[1].t)) {
-							if ('active' in el_to_match[1]) {
-								if ("t" == el_to_match[1].active) {
-									if ('els' in el_to_match[1]) {
-										if (((function(__partial_arg_1) { return contains_active_type("pending", __partial_arg_1)}))(el_to_match[1].els)) {
-											return ["uarr", "rarr", "darr"];
-
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	if (get_type(el_to_match) == 'Array') {
-		if (el_to_match.length == 2) {
-			if ("del" == el_to_match[0]) {
-				if (get_type(el_to_match[1]) == 'Object') {
-					if ('t' in el_to_match[1]) {
-						if (like_list(el_to_match[1].t)) {
-							if ('active' in el_to_match[1]) {
-								if ("t" == el_to_match[1].active) {
-									if ('els' in el_to_match[1]) {
-										if (((function(__partial_arg_1) { return contains_active_type("pending", __partial_arg_1)}))(el_to_match[1].els)) {
+										if (((function(__partial_arg_1) { return contains_active_type(["Atom", "Num", "Str", "pending"], __partial_arg_1)}))(el_to_match[1].els)) {
 											return ["uarr", "del", "darr"];
 
 										}
