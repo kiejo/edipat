@@ -2,13 +2,13 @@
 
 (defn gen_root { t: "List" els: [(gen_pending "...")] active: "t" sel_el: 0 } )
 
-(defn gen_type_with_val type value { t: type val: value })
+(defn gen_type_with_val type value { t: type val: value state: "n" })
 (def gen_pending (gen_type_with_val "pending" _))
 (def gen_atom    (gen_type_with_val "Atom" _))
 (def gen_num     (gen_type_with_val "Num" _))
 (def gen_str     (gen_type_with_val "Str" _))
 
-(defn gen_type_with_els type els { t: type els: els sel_el: 0 })
+(defn gen_type_with_els type els { t: type els: els sel_el: 0 state: "n" })
 (def gen_list (gen_type_with_els "List" _))
 (def gen_arr  (gen_type_with_els "Arr" _))
 (def gen_obj  (gen_type_with_els "Obj" _))
@@ -103,6 +103,11 @@
 				("bs"     { val: (init value) })
 				((is_num) { val: (+ value input) })))
 
+		({t: "Atom" active: "t" state: "pending"}
+			(match input
+				("uarr"    { active: "f" })
+				((is_atom) { val: input state: "n"})))
+
 		({t: "Atom" active: "t" val: value}
 			(match input
 				("uarr"    { active: "f" })
@@ -116,12 +121,16 @@
 (defn update_node_multi node keycodes
 	(foldl node update_node keycodes))
 
+(defn state_pending el (merge el {state: "pending"}))
+
+(defn is_state_pending el (== (#state el) "pending"))
+
 (defn post_triggers node
 	(merge node (match node
-		({t: "List" active: "t" els: [ { t: "Atom" val: fn_name active: "t" } ]}
+		({t: "List" active: "t" els: [ { t: "Atom" val: fn_name active: "t" } & (all (is_state_pending _) _) ]}
 			(match (get_form fn_name special_forms)
-				({gen: items} { els: (.concat (#els node) items) })
-				(_ {})))
+				({gen: items} { els: (cons (head (#els node)) (map (state_pending _) items)) })
+				(_            { els: [(head (#els node))] })))
 
 		({t: (like_list) active: "t" els: (contains_active_elem)}
 			{ els: (map (post_triggers _) (#els node)) })

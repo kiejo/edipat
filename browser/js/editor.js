@@ -5,7 +5,7 @@ return {t: "List", els: [gen_pending("...")], active: "t", sel_el: 0};
 };
 function gen_type_with_val(type, value) { 
 
-return {t: type, val: value};
+return {t: type, val: value, state: "n"};
 };
 var gen_pending = (function(__partial_arg_1) { return gen_type_with_val("pending", __partial_arg_1)});
 var gen_atom = (function(__partial_arg_1) { return gen_type_with_val("Atom", __partial_arg_1)});
@@ -13,7 +13,7 @@ var gen_num = (function(__partial_arg_1) { return gen_type_with_val("Num", __par
 var gen_str = (function(__partial_arg_1) { return gen_type_with_val("Str", __partial_arg_1)});
 function gen_type_with_els(type, els) { 
 
-return {t: type, els: els, sel_el: 0};
+return {t: type, els: els, sel_el: 0, state: "n"};
 };
 var gen_list = (function(__partial_arg_1) { return gen_type_with_els("List", __partial_arg_1)});
 var gen_arr = (function(__partial_arg_1) { return gen_type_with_els("Arr", __partial_arg_1)});
@@ -538,6 +538,33 @@ return el_ind;}})()};
 			if ("Atom" == el_to_match.t) {
 				if ('active' in el_to_match) {
 					if ("t" == el_to_match.active) {
+						if ('state' in el_to_match) {
+							if ("pending" == el_to_match.state) {
+								return (function() { 
+	var el_to_match = input;
+	if ("uarr" == el_to_match) {
+		return {active: "f"};
+
+	}
+
+	if (is_atom(el_to_match)) {
+		return {val: input, state: "n"};
+
+	}})();
+
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
+			if ("Atom" == el_to_match.t) {
+				if ('active' in el_to_match) {
+					if ("t" == el_to_match.active) {
 						if ('val' in el_to_match) {
 							var value = el_to_match.val;
 							return (function() { 
@@ -571,6 +598,14 @@ function update_node_multi(node, keycodes) {
 
 return foldl(node, update_node, keycodes);
 };
+function state_pending(el) { 
+
+return merge(el, {state: "pending"});
+};
+function is_state_pending(el) { 
+
+return (function(a,b) { return a == b; })(el.state, "pending");
+};
 function post_triggers(node) { 
 
 return merge(node, (function() { 
@@ -582,7 +617,7 @@ return merge(node, (function() {
 					if ("t" == el_to_match.active) {
 						if ('els' in el_to_match) {
 							if (get_type(el_to_match.els) == 'Array') {
-								if (el_to_match.els.length == 1) {
+								if (typeof el_to_match.els[0] != 'undefined') {
 									if (get_type(el_to_match.els[0]) == 'Object') {
 										if ('t' in el_to_match.els[0]) {
 											if ("Atom" == el_to_match.els[0].t) {
@@ -590,19 +625,21 @@ return merge(node, (function() {
 													var fn_name = el_to_match.els[0].val;
 													if ('active' in el_to_match.els[0]) {
 														if ("t" == el_to_match.els[0].active) {
-															return (function() { 
+															if (((function(__partial_arg_1) { return all((function(__partial_arg_0) { return is_state_pending(__partial_arg_0)}), __partial_arg_1)}))(el_to_match.els.slice(1))) {
+																return (function() { 
 	var el_to_match = get_form(fn_name, special_forms);
 	if (get_type(el_to_match) == 'Object') {
 		if ('gen' in el_to_match) {
 			var items = el_to_match.gen;
-			return {els: node.els.concat(items)};
+			return {els: cons(head(node.els), map((function(__partial_arg_0) { return state_pending(__partial_arg_0)}), items))};
 
 		}
 	}
 
-	return {};
+	return {els: [head(node.els)]};
 })();
 
+															}
 														}
 													}
 												}
