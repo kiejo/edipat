@@ -44,7 +44,7 @@
 				(any f rest)))))
 
 (defn find f xs (match xs
-	([] "undefined")
+	([] null)
 	([x & rest] (if (f x)
 				 x
 				(find f rest)))))

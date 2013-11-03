@@ -120,8 +120,8 @@
 	(merge node (match node
 		({t: "List" active: "t" els: [ { t: "Atom" val: fn_name active: "t" } ]}
 			(match (get_form fn_name special_forms)
-				("undefined" {})
-				({gen: items} { els: (.concat (#els node) items) })))
+				({gen: items} { els: (.concat (#els node) items) })
+				(_ {})))
 
 		({t: (like_list) active: "t" els: (contains_active_elem)}
 			{ els: (map (post_triggers _) (#els node)) })
@@ -137,7 +137,7 @@
 	{ name: "defn" gen: [ (gen_atom "name") (gen_atom "arg1") (gen_pending "body") ] }
 	{ name: "fn"   gen: [ (gen_atom "arg1")  (gen_pending "body") ] }
 	{ name: "if"   gen: [ (gen_pending "cond") (gen_pending "else") (gen_pending "else") ] }
-	{ name: "nth"  gen: [ { t: "Num"  val: "index" } (gen_pending "array") ] }
+	{ name: "nth"  gen: [ (gen_pending "index") (gen_pending "array") ] }
 
 	{ name: "match" gen: [ (gen_pending "value") (gen_list [ (gen_pending "patt") (gen_pending "expr")]) ] }
 ])
@@ -222,8 +222,8 @@
 
 (defn kd_keycode_to_s pairs kc
 	(match (find (fn pair (match pair ([code s] (== code kc)))) pairs)
-		("undefined" "not_matched")
 		([_ s] s)
+		(_     "not_matched")
 ))
 
 (defn handle_keypress handler key_event

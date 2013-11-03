@@ -592,18 +592,16 @@ return merge(node, (function() {
 														if ("t" == el_to_match.els[0].active) {
 															return (function() { 
 	var el_to_match = get_form(fn_name, special_forms);
-	if ("undefined" == el_to_match) {
-		return {};
-
-	}
-
 	if (get_type(el_to_match) == 'Object') {
 		if ('gen' in el_to_match) {
 			var items = el_to_match.gen;
 			return {els: node.els.concat(items)};
 
 		}
-	}})();
+	}
+
+	return {};
+})();
 
 														}
 													}
@@ -641,7 +639,7 @@ return merge(node, (function() {
 })());
 };
 ;
-var special_forms = [{name: "def", gen: [gen_atom("name"), gen_pending("value")]}, {name: "set", gen: [gen_atom("name"), gen_pending("value")]}, {name: "defn", gen: [gen_atom("name"), gen_atom("arg1"), gen_pending("body")]}, {name: "fn", gen: [gen_atom("arg1"), gen_pending("body")]}, {name: "if", gen: [gen_pending("cond"), gen_pending("else"), gen_pending("else")]}, {name: "nth", gen: [{t: "Num", val: "index"}, gen_pending("array")]}, {name: "match", gen: [gen_pending("value"), gen_list([gen_pending("patt"), gen_pending("expr")])]}];
+var special_forms = [{name: "def", gen: [gen_atom("name"), gen_pending("value")]}, {name: "set", gen: [gen_atom("name"), gen_pending("value")]}, {name: "defn", gen: [gen_atom("name"), gen_atom("arg1"), gen_pending("body")]}, {name: "fn", gen: [gen_atom("arg1"), gen_pending("body")]}, {name: "if", gen: [gen_pending("cond"), gen_pending("else"), gen_pending("else")]}, {name: "nth", gen: [gen_pending("index"), gen_pending("array")]}, {name: "match", gen: [gen_pending("value"), gen_list([gen_pending("patt"), gen_pending("expr")])]}];
 function get_form(name, forms) { 
 
 return find(function (form) { 
@@ -848,18 +846,16 @@ return (function() {
 		}
 	}})();
 }, pairs);
-	if ("undefined" == el_to_match) {
-		return "not_matched";
-
-	}
-
 	if (get_type(el_to_match) == 'Array') {
 		if (el_to_match.length == 2) {
 			var s = el_to_match[1];
 			return s;
 
 		}
-	}})();
+	}
+
+	return "not_matched";
+})();
 };
 function handle_keypress(handler, key_event) { 
 

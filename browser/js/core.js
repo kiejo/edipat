@@ -91,7 +91,7 @@ return (function() {
 	var el_to_match = xs;
 	if (get_type(el_to_match) == 'Array') {
 		if (el_to_match.length == 0) {
-			return "undefined";
+			return null;
 
 		}
 	}
