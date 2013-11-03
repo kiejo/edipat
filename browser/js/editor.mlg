@@ -2,13 +2,13 @@
 
 (defn gen_root { t: "List" els: [(gen_pending "...")] active: "t" sel_el: 0 } )
 
-(defn gen_type_with_val type value { t: type val: value state: "n" })
+(defn gen_type_with_val type value { t: type val: value state: "n" active: "f" })
 (def gen_pending (gen_type_with_val "pending" _))
 (def gen_atom    (gen_type_with_val "Atom" _))
 (def gen_num     (gen_type_with_val "Num" _))
 (def gen_str     (gen_type_with_val "Str" _))
 
-(defn gen_type_with_els type els { t: type els: els sel_el: 0 state: "n" })
+(defn gen_type_with_els type els { t: type els: els sel_el: 0 state: "n" active: "f" })
 (def gen_list (gen_type_with_els "List" _))
 (def gen_arr  (gen_type_with_els "Arr" _))
 (def gen_obj  (gen_type_with_els "Obj" _))
@@ -55,7 +55,9 @@
 
 		(["del" {t: (like_list) active: "t" els: (contains_active_type "Atom" _)}] ["uarr" "del" "darr"])
 
-		(["del" {t: (like_list) active: "t" els: (contains_active_type "pending" _)}] ["uarr" "del" "darr"])
+		(["larr" {t: (like_list) active: "t" els: (contains_active_type "pending" _)}] ["uarr" "larr" "darr"])
+		(["rarr" {t: (like_list) active: "t" els: (contains_active_type "pending" _)}] ["uarr" "rarr" "darr"])
+		(["del"  {t: (like_list) active: "t" els: (contains_active_type "pending" _)}] ["uarr" "del"  "darr"])
 
 		([_ {t: (like_list) active: "t" els: (contains_active_elem) sel_el: el_ind}]
 			(get_triggered_input (nth el_ind (#els node)) input))
@@ -82,13 +84,13 @@
 		({t: "pending" active: "t"}
 			(match input
 				("uarr"    { active: "f" })
-				("'"       (gen_str ""))
-				("["       (gen_arr  [(activate (gen_pending "el"))]))
-				("("       (gen_list [(activate (gen_pending "el"))]))
-				("{"       (gen_obj  [(activate (gen_pending "el"))]))
-				(":"       (gen_obj  [(activate (gen_atom "")) (gen_pending "el")]))
-				((is_num)  (gen_num input))
-				((is_atom) (gen_atom input))))
+				("'"       (activate (gen_str "")))
+				("["       (activate (gen_arr  [(activate (gen_pending "el"))])))
+				("("       (activate (gen_list [(activate (gen_pending "el"))])))
+				("{"       (activate (gen_obj  [(activate (gen_pending "el"))])))
+				(":"       (activate (gen_obj  [(activate (gen_atom "")) (gen_pending "el")])))
+				((is_num)  (activate (gen_num input)))
+				((is_atom) (activate (gen_atom input)))))
 
 		({t: "Str" active: "t" val: value}
 			(match input
@@ -172,15 +174,15 @@
 
 	({t: "Pair" els: [k v]} (str [(render k) ": " (render v)]))
 
-	({t: "Num" val: value} (render_active value (#active node)))
-
-	({t: "Str" val: value} (str ["'" (render_active value (#active node)) "'"]))
-
-	({t: "Atom" val: value} (render_active value (#active node)))
-
-	({t: "pending" val: value} (render_active value (#active node)))
-
+	(el (render_primitive el))
 ))
+
+(defn get_classes prim (match prim
+	({active: act state: st} [(str ["act_" act]) (str ["st_" st])])
+	(_ [])))
+
+(defn render_primitive prim
+	(wrap_span (#val prim) (join " " (get_classes prim))))
 
 (defn render_active s is_active
 	(if (== is_active "t")
