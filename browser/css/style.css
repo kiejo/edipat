@@ -3,9 +3,31 @@
 	width: 100%;
 }
 
+#grammar-wrapper {
+	width: 5%;
+}
+
+#input-wrapper {
+	width: 10%;
+}
+
+#ast-wrapper {
+	width: 30%;
+}
+
+#render-wrapper {
+	width: 45%;
+	position: relative;
+	border: solid 1px black;
+}
+
+#completions {
+	position:absolute;
+	bottom:0;
+}
+
 .codebox {
 	float: left;
-	width: 23%;
 	height: 500px;
 	padding: 0px 5px;
 }
@@ -22,6 +44,10 @@
 #compile {
 	margin-top: 30px;
 }
+
+
+
+/*rendering*/
 
 .st_pending {
 	opacity: 0.5;

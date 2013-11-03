@@ -22,7 +22,7 @@
   <body>
   	<div id="container">
 	  	<div id="grammar-wrapper" class="codebox">
-	  		Grammar
+	  		<span>Grammar</span>
 	  		<textarea class="code" id="grammar">
 {
   function makeNumber(n) {
@@ -87,11 +87,9 @@ object
 
 _ = [\n, \t, ]*
 
-
-
-
-
 	  		</textarea>
+
+
 	  	</div>
 	  	<div id="input-wrapper" class="codebox">
 	  		Input
@@ -101,12 +99,16 @@ _ = [\n, \t, ]*
 	  		AST
 	  		<textarea class="code" id="ast"></textarea>
 	  	</div>
-      <div id="rendered" class="codebox">
-        
+      <div id="render-wrapper" class="codebox">
+        Rendered AST
+        <div id="rendered" class="code"></div>
+        <div class="clear"/>
+        <div id="completions"/>
       </div>
+
   	</div>
 
-  	<div class="clear"/>
+  	</div>
 
   </body>
 

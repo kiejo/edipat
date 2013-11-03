@@ -117,7 +117,10 @@
 (defn update_node_multi node keycodes
 	(foldl node update_node keycodes))
 
-(defn state_pending el (merge el {state: "pending"}))
+(defn make_state_pending el
+	(merge el (match el
+		({els: elems} { state: "pending" els: (map (make_state_pending _) elems) })
+		({}           { state: "pending" }))))
 
 (defn is_state_pending el (== (#state el) "pending"))
 
@@ -125,15 +128,25 @@
 	(merge node (match node
 		({t: "List" active: "t" els: [ { t: "Atom" val: fn_name active: "t" } & (all (is_state_pending _) _) ]}
 			(match (get_form fn_name special_forms)
-				({gen: items} { els: (cons (head (#els node)) (map (state_pending _) items)) })
+				({gen: items} { els: (cons (head (#els node)) (map (make_state_pending _) items)) })
 				(_            { els: [(head (#els node))] })))
 
-		({t: (like_list) active: "t" els: (contains_active_elem)}
-			{ els: (map (post_triggers _) (#els node)) })
+		({t: (like_list) active: "t" els: elems}
+			{ els: (map (post_triggers _) elems) })
 
 		(_ {})
 	))
 )
+
+(defn get_completions node (match node
+	({t: "List" active: "t" els: [ { t: "Atom" val: fn_name active: "t" } & rest ]}
+		(filter (fn form (starts_with fn_name (#name form))) special_forms))
+
+	({t: (like_list) active: "t" els: elems}
+		(flatten (map (get_completions _) elems)))
+
+	(_ [])
+))
 
 //special forms
 (def special_forms [
@@ -148,10 +161,10 @@
 ])
 
 (defn get_form name forms
-	(find (fn form (match form
-					({name: (== name _)} true)
-					(_ false)))
-		  forms))
+	(find (fn form (== (#name form) name)) forms))
+
+(defn get_form_by f forms
+	(find f forms))
 
 
 //renderer
@@ -180,11 +193,6 @@
 (defn render_primitive prim
 	(wrap_span (#val prim) (join " " (get_classes prim))))
 
-(defn render_active s is_active
-	(if (== is_active "t")
-		(wrap_span s "active")
-		s))
-
 (defn wrap_span cont cl (str ["<span class='" cl "'>" cont "</span>"]))
 
 
@@ -192,14 +200,23 @@
 
 (def root_node (gen_root))
 
+(def completion_helper [])
+
 (defn update_view node (do
 	(.text ($ "#ast") (.parse jsDump node))
-	(.html ($ "#rendered") (render node)))
-)
+	(.html ($ "#rendered") (render node))
+))
+
+(defn update_view_compl completions (do
+	(.html ($ "#completions") (join ", " (map (fn el (#name el)) completions)))
+))
 
 (defn update node input (do
 	(set root_node (post_triggers (update_node_multi node (get_triggered_input node input))))
 	(update_view root_node)
+
+	(set completion_helper (get_completions root_node))
+	(update_view_compl completion_helper)
 ))
 
 
