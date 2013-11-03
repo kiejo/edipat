@@ -43,6 +43,29 @@ if (empty(xs)) {
 return [];} else { 
 return cons(f(head(xs)), map(f, tail(xs)));}})();
 };
+function filter(f, xs) { 
+
+return (function() { 
+	var el_to_match = xs;
+	if (get_type(el_to_match) == 'Array') {
+		if (el_to_match.length == 0) {
+			return [];
+
+		}
+	}
+
+	if (get_type(el_to_match) == 'Array') {
+		if (typeof el_to_match[0] != 'undefined') {
+			var x = el_to_match[0];
+			var rest = el_to_match.slice(1);
+			return (function() { 
+if (f(x)) { 
+return cons(x, filter(f, rest));} else { 
+return filter(f, rest);}})();
+
+		}
+	}})();
+};
 function foldl(acc, f, xs) { 
 
 return (function() { 
@@ -230,4 +253,8 @@ return (function() {
 			}
 		}
 	}})();
+};
+function starts_with(s, input) { 
+
+return (function(a,b) { return a == b; })(input.indexOf(s), 0);
 };

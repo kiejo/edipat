@@ -23,6 +23,12 @@
 		[]
 		(cons (f (head xs)) (map f (tail xs)))))
 
+(defn filter f xs (match xs
+	([] [])
+	([x & rest] (if (f x)
+				 	(cons x (filter f rest))
+					(filter f rest)))))
+
 (defn foldl acc f xs
 	(if (empty xs)
 		acc
@@ -78,3 +84,6 @@
 	([_ []] [el])
 	([0 [x & rest]] (concat [el x] rest))
 	([_ [x & rest]] (cons x (insert_at (dec n) el rest)))))
+
+(defn starts_with s input
+	(== (.indexOf input s) 0))
