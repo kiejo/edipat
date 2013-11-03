@@ -99,8 +99,8 @@ function gen_patt_info(patt, el, el_accessor) {
 			} 
 
 			for (var i = 0; i < patt.elements.length; i++) {
-				if (patt.elements[i].type == 'Atom' && patt.elements[i].name == '&') {  //bind the rest of the array to the next element in the pattern
-					res.push({type: 'Decl', name: patt.elements[i + 1].name, value: comp_el + '.slice(' + i + ')'})
+				if (patt.elements[i].type == 'Atom' && patt.elements[i].name == '&') {  //match the rest of the array against the next patt in the pattern
+					res.push(gen_patt_info(patt.elements[i + 1], el, '.slice(' + i + ')'));
 					break;
 				}
 
