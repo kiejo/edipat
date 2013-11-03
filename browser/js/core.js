@@ -85,6 +85,29 @@ return any(f, rest);}})();
 		}
 	}})();
 };
+function all(f, xs) { 
+
+return (function() { 
+	var el_to_match = xs;
+	if (get_type(el_to_match) == 'Array') {
+		if (el_to_match.length == 0) {
+			return true;
+
+		}
+	}
+
+	if (get_type(el_to_match) == 'Array') {
+		if (typeof el_to_match[0] != 'undefined') {
+			var x = el_to_match[0];
+			var rest = el_to_match.slice(1);
+			return (function() { 
+if (f(x)) { 
+return any(f, rest);} else { 
+return false;}})();
+
+		}
+	}})();
+};
 function find(f, xs) { 
 
 return (function() { 

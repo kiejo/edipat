@@ -40,8 +40,14 @@
 (defn any f xs (match xs
 	([] false)
 	([x & rest] (if (f x)
-				 true
-				(any f rest)))))
+				 	true
+					(any f rest)))))
+
+(defn all f xs (match xs
+	([] true)
+	([x & rest] (if (f x)
+				 	(any f rest)
+				 	false))))
 
 (defn find f xs (match xs
 	([] null)
