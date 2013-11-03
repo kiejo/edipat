@@ -166,6 +166,8 @@
 	({t: "Obj" els: elems}
 		(str ["{ " (join " " (map render elems)) " }"]))
 
+	({t: "Str" } (str ["'" (render_primitive node) "'"]))
+
 	({t: "Pair" els: [k v]} (str [(render k) ": " (render v)]))
 
 	(el (render_primitive el))

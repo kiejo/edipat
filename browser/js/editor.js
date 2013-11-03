@@ -693,6 +693,15 @@ return (function() {
 
 	if (get_type(el_to_match) == 'Object') {
 		if ('t' in el_to_match) {
+			if ("Str" == el_to_match.t) {
+				return str(["'", render_primitive(node), "'"]);
+
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
 			if ("Pair" == el_to_match.t) {
 				if ('els' in el_to_match) {
 					if (get_type(el_to_match.els) == 'Array') {
