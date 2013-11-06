@@ -1,7 +1,7 @@
 ;
 function gen_root() { 
 
-return {t: "List", els: [gen_pending("...")], active: "t", sel_el: 0};
+return gen_type_with_els("root", [gen_pending("...")]);
 };
 function gen_type_with_val(type, value) { 
 
@@ -130,7 +130,7 @@ return map((function(__partial_arg_0) { return merge(__partial_arg_0, {active: "
 };
 function like_list(el) { 
 
-return any((function(__partial_arg_1) { return (function(a,b) { return a == b; })(el, __partial_arg_1)}), ["List", "Arr", "Obj", "Pair"]);
+return any((function(__partial_arg_1) { return (function(a,b) { return a == b; })(el, __partial_arg_1)}), ["root", "List", "Arr", "Obj", "Pair"]);
 };
 function contains_active_elem(els) { 
 
@@ -148,7 +148,7 @@ function contains_active_type(types, els) {
 
 return any((function(__partial_arg_1) { return is_active_type(types, __partial_arg_1)}), els);
 };
-function is_real_active_type(el) { 
+function is_real_active(el) { 
 
 return (function() { 
 	var el_to_match = el;
@@ -179,6 +179,10 @@ return !(is_active(el));
 
 	return false;
 })();
+};
+function contains_real_active(els) { 
+
+return any((function(__partial_arg_0) { return is_real_active(__partial_arg_0)}), els);
 };
 function get_triggered_input(node, input) { 
 
@@ -222,11 +226,34 @@ return (function() {
 									if ('els' in el_to_match[1]) {
 										if (get_type(el_to_match[1].els) == 'Array') {
 											if (el_to_match[1].els.length == 2) {
-												if (((function(__partial_arg_0) { return is_real_active_type(__partial_arg_0)}))(el_to_match[1].els[1])) {
+												if (((function(__partial_arg_0) { return is_real_active(__partial_arg_0)}))(el_to_match[1].els[1])) {
 													return ["uarr", "uarr", " ", ":"];
 
 												}
 											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Array') {
+		if (el_to_match.length == 2) {
+			if (")" == el_to_match[0]) {
+				if (get_type(el_to_match[1]) == 'Object') {
+					if ('t' in el_to_match[1]) {
+						if ("List" == el_to_match[1].t) {
+							if ('active' in el_to_match[1]) {
+								if ("t" == el_to_match[1].active) {
+									if ('els' in el_to_match[1]) {
+										if (((function(__partial_arg_0) { return contains_real_active(__partial_arg_0)}))(el_to_match[1].els)) {
+											return ["uarr", "uarr", " "];
+
 										}
 									}
 								}
@@ -426,7 +453,10 @@ return merge(node, (function() {
 	}
 
 	if ("uarr" == el_to_match) {
-		return {active: "f"};
+		return (function() { 
+if ((function(a,b) { return a == b; })(node.t, "root")) { 
+return {};} else { 
+return {active: "f"};}})();
 
 	}
 
@@ -811,6 +841,18 @@ return (function() {
 	var el_to_match = node;
 	if (get_type(el_to_match) == 'Object') {
 		if ('t' in el_to_match) {
+			if ("root" == el_to_match.t) {
+				if ('els' in el_to_match) {
+					var elems = el_to_match.els;
+					return join("<br/>", map(render, elems));
+
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
 			if ("List" == el_to_match.t) {
 				if ('active' in el_to_match) {
 					if ("t" == el_to_match.active) {
@@ -922,7 +964,7 @@ function wrap_span(cont, cl) {
 return str(["<span class='", cl, "'>", cont, "</span>"]);
 };
 ;
-var root_node = gen_root();
+var root_node = activate(gen_root());
 var completion_helper = [];
 function update_view(node) { 
 
