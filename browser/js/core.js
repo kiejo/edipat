@@ -202,6 +202,10 @@ function dec(a) {
 
 return (function(a,b) { return a - b; })(a, 1);
 };
+function mod(a, b) { 
+
+return (function(a,b) { return a % b; })((function(a,b) { return a + b; })((function(a,b) { return a % b; })(a, b), b), b);
+};
 function min(a, b) { 
 
 return (function() { 
