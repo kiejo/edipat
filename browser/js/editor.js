@@ -152,6 +152,11 @@ function is_real_active_type(el) {
 
 return (function() { 
 	var el_to_match = el;
+	if (((function(__partial_arg_1) { return is_active_type(["Atom", "Num", "Str", "pending"], __partial_arg_1)}))(el_to_match)) {
+		return true;
+
+	}
+
 	if (get_type(el_to_match) == 'Object') {
 		if ('active' in el_to_match) {
 			if ("t" == el_to_match.active) {
@@ -170,11 +175,6 @@ return !(is_active(el));
 				}
 			}
 		}
-	}
-
-	if (((function(__partial_arg_1) { return is_active_type(["Atom", "Num", "Str", "pending"], __partial_arg_1)}))(el_to_match)) {
-		return true;
-
 	}
 
 	return false;
@@ -416,12 +416,12 @@ return merge(node, (function() {
 								return (function() { 
 	var el_to_match = input;
 	if ("larr" == el_to_match) {
-		return {sel_el: dec(el_ind)};
+		return {sel_el: mod(dec(el_ind), node.els.length)};
 
 	}
 
 	if ("rarr" == el_to_match) {
-		return {sel_el: inc(el_ind)};
+		return {sel_el: mod(inc(el_ind), node.els.length)};
 
 	}
 

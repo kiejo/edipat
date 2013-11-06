@@ -48,16 +48,15 @@
 	(any (is_active_type types _) els))
 
 (defn is_real_active_type el (match el
-	({active: "t" t: (like_list _) els: (all (fn el (! (is_active el))) _)} true)
 	((is_active_type ["Atom" "Num" "Str" "pending"] _) true)
+	({active: "t" t: (like_list _) els: (all (fn el (! (is_active el))) _)} true)
 	(_ false)))
 
 (defn get_triggered_input node input
 	(match [input node]
 
 		([" " {t: "Pair" active: "t" els: [ (is_active_type ["Atom"] _) _ ]}] ["uarr" "rarr" "darr"])
-
-		([" " {t: "Pair" active: "t" els: [ _ (is_real_active_type _) ]}] ["uarr" "uarr" " " ":"])
+		([" " {t: "Pair" active: "t" els: [ _ (is_real_active_type _)     ]}] ["uarr" "uarr" " " ":"])
 
 		([" " {t: (like_list) active: "t" els: (contains_active_type ["Atom" "Num"] _)}] ["uarr" " "])
 		(["'" {t: (like_list) active: "t" els: (contains_active_type ["Str"] _)}]        ["uarr" " "])
@@ -80,8 +79,8 @@
 
 		({t: (like_list) active: "t" els: elems sel_el: el_ind}
 			(match input
-				("larr" { sel_el: (dec el_ind) })
-				("rarr" { sel_el: (inc el_ind) })
+				("larr" { sel_el: (mod (dec el_ind) (#length (#els node))) })
+				("rarr" { sel_el: (mod (inc el_ind) (#length (#els node))) })
 				("uarr" { active: "f" })
 				("darr" { els: (activate_nth el_ind elems) })
 				("del"  { els: (remove_nth   el_ind elems) sel_el: (if (== (#length elems) (inc el_ind)) (dec el_ind) el_ind) })
