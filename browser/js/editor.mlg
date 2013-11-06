@@ -170,6 +170,9 @@
 //renderer
 
 (defn render node (match node
+	({t: "List" active: "t" els: (all (fn el (! (is_active el))) _)}
+		(wrap_span (str ["(" (join " " (map render (#els node))) ")"]) "act_t"))
+
 	({t: "List" els: elems}
 		(str ["(" (join " " (map render elems)) ")"]))
 
@@ -227,7 +230,7 @@
 	[37 "larr"]
 	[38 "uarr"]
 	[39 "rarr"]
-	[9  "rarr"]
+	[9  "tab"]
 	[40 "darr"]
 	[46 "del"]
 ])

@@ -721,6 +721,26 @@ return (function() {
 	if (get_type(el_to_match) == 'Object') {
 		if ('t' in el_to_match) {
 			if ("List" == el_to_match.t) {
+				if ('active' in el_to_match) {
+					if ("t" == el_to_match.active) {
+						if ('els' in el_to_match) {
+							if (((function(__partial_arg_1) { return all(function (el) { 
+
+return !(is_active(el));
+}, __partial_arg_1)}))(el_to_match.els)) {
+								return wrap_span(str(["(", join(" ", map(render, node.els)), ")"]), "act_t");
+
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
+			if ("List" == el_to_match.t) {
 				if ('els' in el_to_match) {
 					var elems = el_to_match.els;
 					return str(["(", join(" ", map(render, elems)), ")"]);
@@ -840,7 +860,7 @@ return update_view_compl(completion_helper);
 })();
 };
 ;
-var special_input = [[8, "bs"], [37, "larr"], [38, "uarr"], [39, "rarr"], [9, "rarr"], [40, "darr"], [46, "del"]];
+var special_input = [[8, "bs"], [37, "larr"], [38, "uarr"], [39, "rarr"], [9, "tab"], [40, "darr"], [46, "del"]];
 function is_num(input) { 
 
 return any((function(__partial_arg_1) { return (function(a,b) { return a == b; })(input, __partial_arg_1)}), map(function (n) { 
