@@ -12,6 +12,8 @@
 
 (defn init xs (.slice xs 0 -1))
 
+(defn id a a)
+
 (defn each f xs
 	(if (empty xs)
 		undefined
@@ -54,6 +56,12 @@
 	([x & rest] (if (f x)
 				 	(all f rest)
 				 	false))))
+
+(defn and bools
+	(all id bools))
+
+(defn or bools
+	(any id bools))
 
 (defn find f xs (match xs
 	([] null)

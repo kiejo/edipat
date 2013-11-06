@@ -26,6 +26,10 @@ function init(xs) {
 
 return xs.slice(0, -1);
 };
+function id(a) { 
+
+return a;
+};
 function each(f, xs) { 
 
 return (function() { 
@@ -130,6 +134,14 @@ return false;}})();
 
 		}
 	}})();
+};
+function and(bools) { 
+
+return all(id, bools);
+};
+function or(bools) { 
+
+return any(id, bools);
 };
 function find(f, xs) { 
 
