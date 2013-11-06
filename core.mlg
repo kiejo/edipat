@@ -52,7 +52,7 @@
 (defn all f xs (match xs
 	([] true)
 	([x & rest] (if (f x)
-				 	(any f rest)
+				 	(all f rest)
 				 	false))))
 
 (defn find f xs (match xs

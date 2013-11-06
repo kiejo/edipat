@@ -125,7 +125,7 @@ return (function() {
 			var rest = el_to_match.slice(1);
 			return (function() { 
 if (f(x)) { 
-return any(f, rest);} else { 
+return all(f, rest);} else { 
 return false;}})();
 
 		}
