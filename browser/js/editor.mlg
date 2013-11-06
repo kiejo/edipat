@@ -40,18 +40,31 @@
 
 (defn contains_active_elem els (any is_active els))
 
+(defn is_type types el (any (== (#t el) _) types))
+
+(defn is_active_type types el (&& (is_active el) (is_type types el)))
+
 (defn contains_active_type types els
-	(any (fn el (&& (is_active el) (any (== (#t el) _) types))) els))
+	(any (is_active_type types _) els))
+
+(defn is_real_active_type el (match el
+	({active: "t" t: (like_list _) els: (all (fn el (! (is_active el))) _)} true)
+	((is_active_type ["Atom" "Num" "Str" "pending"] _) true)
+	(_ false)))
 
 (defn get_triggered_input node input
 	(match [input node]
 
+		([" " {t: "Pair" active: "t" els: [ (is_active_type ["Atom"] _) _ ]}] ["uarr" "rarr" "darr"])
+
+		([" " {t: "Pair" active: "t" els: [ _ (is_real_active_type _) ]}] ["uarr" "uarr" " " ":"])
+
 		([" " {t: (like_list) active: "t" els: (contains_active_type ["Atom" "Num"] _)}] ["uarr" " "])
 		(["'" {t: (like_list) active: "t" els: (contains_active_type ["Str"] _)}]        ["uarr" " "])
 
-		(["larr" {t: (like_list) active: "t" els: (contains_active_type ["Atom" "Num" "Str" "pending"] _)}] ["uarr" "larr" "darr"])
-		(["rarr" {t: (like_list) active: "t" els: (contains_active_type ["Atom" "Num" "Str" "pending"] _)}] ["uarr" "rarr" "darr"])
-		(["del"  {t: (like_list) active: "t" els: (contains_active_type ["Atom" "Num" "Str" "pending"] _)}] ["uarr" "del"  "darr"])
+		(["larr" {t: (like_list) active: "t" els: (contains_active_type ["Atom" "Num" "Str" "pending" "List"] _)}] ["uarr" "larr" "darr"])
+		(["rarr" {t: (like_list) active: "t" els: (contains_active_type ["Atom" "Num" "Str" "pending" "List"] _)}] ["uarr" "rarr" "darr"])
+		(["del"  {t: (like_list) active: "t" els: (contains_active_type ["Atom" "Num" "Str" "pending" "List"] _)}] ["uarr" "del"  "darr"])
 
 		([_ {t: (like_list) active: "t" els: (contains_active_elem) sel_el: el_ind}]
 			(get_triggered_input (nth el_ind (#els node)) input))
@@ -81,8 +94,8 @@
 				("'"       (activate (gen_str "")))
 				("["       (activate (gen_arr  [(activate (gen_pending "el"))])))
 				("("       (activate (gen_list [(activate (gen_pending "el"))])))
-				("{"       (activate (gen_obj  [(activate (gen_pending "el"))])))
-				(":"       (activate (gen_obj  [(activate (gen_atom "")) (gen_pending "el")])))
+				("{"       (activate (gen_obj  [(activate (gen_pair [(activate (gen_atom "key")) (gen_pending "el")]))])))
+				(":"       (activate (gen_pair [(activate (gen_atom "key")) (gen_pending "el")])))
 				((is_num)  (activate (gen_num input)))
 				((is_atom) (activate (gen_atom input)))))
 

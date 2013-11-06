@@ -136,17 +136,108 @@ function contains_active_elem(els) {
 
 return any(is_active, els);
 };
+function is_type(types, el) { 
+
+return any((function(__partial_arg_1) { return (function(a,b) { return a == b; })(el.t, __partial_arg_1)}), types);
+};
+function is_active_type(types, el) { 
+
+return (function(a,b) { return a && b; })(is_active(el), is_type(types, el));
+};
 function contains_active_type(types, els) { 
 
-return any(function (el) { 
+return any((function(__partial_arg_1) { return is_active_type(types, __partial_arg_1)}), els);
+};
+function is_real_active_type(el) { 
 
-return (function(a,b) { return a && b; })(is_active(el), any((function(__partial_arg_1) { return (function(a,b) { return a == b; })(el.t, __partial_arg_1)}), types));
-}, els);
+return (function() { 
+	var el_to_match = el;
+	if (get_type(el_to_match) == 'Object') {
+		if ('active' in el_to_match) {
+			if ("t" == el_to_match.active) {
+				if ('t' in el_to_match) {
+					if (((function(__partial_arg_0) { return like_list(__partial_arg_0)}))(el_to_match.t)) {
+						if ('els' in el_to_match) {
+							if (((function(__partial_arg_1) { return all(function (el) { 
+
+return !(is_active(el));
+}, __partial_arg_1)}))(el_to_match.els)) {
+								return true;
+
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if (((function(__partial_arg_1) { return is_active_type(["Atom", "Num", "Str", "pending"], __partial_arg_1)}))(el_to_match)) {
+		return true;
+
+	}
+
+	return false;
+})();
 };
 function get_triggered_input(node, input) { 
 
 return (function() { 
 	var el_to_match = [input, node];
+	if (get_type(el_to_match) == 'Array') {
+		if (el_to_match.length == 2) {
+			if (" " == el_to_match[0]) {
+				if (get_type(el_to_match[1]) == 'Object') {
+					if ('t' in el_to_match[1]) {
+						if ("Pair" == el_to_match[1].t) {
+							if ('active' in el_to_match[1]) {
+								if ("t" == el_to_match[1].active) {
+									if ('els' in el_to_match[1]) {
+										if (get_type(el_to_match[1].els) == 'Array') {
+											if (el_to_match[1].els.length == 2) {
+												if (((function(__partial_arg_1) { return is_active_type(["Atom"], __partial_arg_1)}))(el_to_match[1].els[0])) {
+													return ["uarr", "rarr", "darr"];
+
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Array') {
+		if (el_to_match.length == 2) {
+			if (" " == el_to_match[0]) {
+				if (get_type(el_to_match[1]) == 'Object') {
+					if ('t' in el_to_match[1]) {
+						if ("Pair" == el_to_match[1].t) {
+							if ('active' in el_to_match[1]) {
+								if ("t" == el_to_match[1].active) {
+									if ('els' in el_to_match[1]) {
+										if (get_type(el_to_match[1].els) == 'Array') {
+											if (el_to_match[1].els.length == 2) {
+												if (((function(__partial_arg_0) { return is_real_active_type(__partial_arg_0)}))(el_to_match[1].els[1])) {
+													return ["uarr", "uarr", " ", ":"];
+
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
 	if (get_type(el_to_match) == 'Array') {
 		if (el_to_match.length == 2) {
 			if (" " == el_to_match[0]) {
@@ -202,7 +293,7 @@ return (function() {
 							if ('active' in el_to_match[1]) {
 								if ("t" == el_to_match[1].active) {
 									if ('els' in el_to_match[1]) {
-										if (((function(__partial_arg_1) { return contains_active_type(["Atom", "Num", "Str", "pending"], __partial_arg_1)}))(el_to_match[1].els)) {
+										if (((function(__partial_arg_1) { return contains_active_type(["Atom", "Num", "Str", "pending", "List"], __partial_arg_1)}))(el_to_match[1].els)) {
 											return ["uarr", "larr", "darr"];
 
 										}
@@ -225,7 +316,7 @@ return (function() {
 							if ('active' in el_to_match[1]) {
 								if ("t" == el_to_match[1].active) {
 									if ('els' in el_to_match[1]) {
-										if (((function(__partial_arg_1) { return contains_active_type(["Atom", "Num", "Str", "pending"], __partial_arg_1)}))(el_to_match[1].els)) {
+										if (((function(__partial_arg_1) { return contains_active_type(["Atom", "Num", "Str", "pending", "List"], __partial_arg_1)}))(el_to_match[1].els)) {
 											return ["uarr", "rarr", "darr"];
 
 										}
@@ -248,7 +339,7 @@ return (function() {
 							if ('active' in el_to_match[1]) {
 								if ("t" == el_to_match[1].active) {
 									if ('els' in el_to_match[1]) {
-										if (((function(__partial_arg_1) { return contains_active_type(["Atom", "Num", "Str", "pending"], __partial_arg_1)}))(el_to_match[1].els)) {
+										if (((function(__partial_arg_1) { return contains_active_type(["Atom", "Num", "Str", "pending", "List"], __partial_arg_1)}))(el_to_match[1].els)) {
 											return ["uarr", "del", "darr"];
 
 										}
@@ -396,12 +487,12 @@ return el_ind;}})()};
 	}
 
 	if ("{" == el_to_match) {
-		return activate(gen_obj([activate(gen_pending("el"))]));
+		return activate(gen_obj([activate(gen_pair([activate(gen_atom("key")), gen_pending("el")]))]));
 
 	}
 
 	if (":" == el_to_match) {
-		return activate(gen_obj([activate(gen_atom("")), gen_pending("el")]));
+		return activate(gen_pair([activate(gen_atom("key")), gen_pending("el")]));
 
 	}
 
