@@ -144,29 +144,44 @@
 
 (defn is_state_pending el (== (#state el) "pending"))
 
-(defn post_triggers node
+(defn post_triggers node completions
 	(merge node (match node
 		({t: "List" active: "t" els: [ { t: "Atom" val: fn_name active: "t" } & (all (is_state_pending _) _) ]}
-			(match (get_form fn_name special_forms)
+			(match (get_form fn_name completions)
 				({gen: items} { els: (cons (head (#els node)) (map (make_state_pending _) items)) })
 				(_            { els: [(head (#els node))] })))
 
 		({t: (like_list) active: "t" els: elems}
-			{ els: (map (post_triggers _) elems) })
+			{ els: (map (post_triggers _ completions) elems) })
 
 		(_ {})
 	))
 )
 
-(defn get_completions node (match node
+(defn get_completions node root (match node
 	({t: "List" active: "t" els: [ { t: "Atom" val: fn_name active: "t" } & rest ]}
-		(filter (fn form (starts_with fn_name (#name form))) special_forms))
+		(filter (fn form (starts_with fn_name (#name form))) (concat special_forms (get_fns_in_scope root))))
 
 	({t: (like_list) active: "t" els: elems}
-		(flatten (map (get_completions _) elems)))
+		(flatten (map (get_completions _ root) elems)))
 
 	(_ [])
 ))
+
+(defn get_fns_in_scope node
+	(match node
+		({t: "root" els: elems}
+			(flatten (map get_fns_in_scope elems)))
+
+		({t: "List" active: "t" els: [{t: "Atom" val: "do"} & rest]}
+			(flatten (map get_fns_in_scope rest)))
+
+		({t: "List" els: [{t: "Atom" val: "defn"} {t: "Atom" val: name state: "n"} & rest]}
+			[{name: name gen: (map (fn arg (gen_pending (#val arg))) (init rest))}])
+
+		(_ [])
+	)
+)
 
 //special forms
 (def special_forms [
@@ -176,15 +191,13 @@
 	{ name: "fn"   gen: [ (gen_atom "arg1")  (gen_pending "body") ] }
 	{ name: "if"   gen: [ (gen_pending "cond") (gen_pending "else") (gen_pending "else") ] }
 	{ name: "nth"  gen: [ (gen_pending "index") (gen_pending "array") ] }
+	{ name: "do"   gen: [ (gen_list [(gen_pending "...")]) ] }
 
-	{ name: "match" gen: [ (gen_pending "value") (gen_list [ (gen_pending "patt") (gen_pending "expr")]) ] }
+	{ name: "match" gen: [ (gen_pending "value") (gen_list [(gen_pending "patt") (gen_pending "expr")]) ] }
 ])
 
 (defn get_form name forms
 	(find (fn form (== (#name form) name)) forms))
-
-(defn get_form_by f forms
-	(find f forms))
 
 
 //renderer
@@ -252,10 +265,12 @@
 ))
 
 (defn update node input (do
-	(set root_node (post_triggers (update_node_multi node (get_triggered_input node input))))
-	(update_view root_node)
+	(def tmp_node (update_node_multi node (get_triggered_input node input)))
+	(set completion_helper (get_completions tmp_node tmp_node))
 
-	(set completion_helper (get_completions root_node))
+	(set root_node (post_triggers tmp_node completion_helper))
+	
+	(update_view root_node)
 	(update_view_compl completion_helper)
 ))
 

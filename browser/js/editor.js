@@ -698,7 +698,7 @@ function is_state_pending(el) {
 
 return (function(a,b) { return a == b; })(el.state, "pending");
 };
-function post_triggers(node) { 
+function post_triggers(node, completions) { 
 
 return merge(node, (function() { 
 	var el_to_match = node;
@@ -719,7 +719,7 @@ return merge(node, (function() {
 														if ("t" == el_to_match.els[0].active) {
 															if (((function(__partial_arg_1) { return all((function(__partial_arg_0) { return is_state_pending(__partial_arg_0)}), __partial_arg_1)}))(el_to_match.els.slice(1))) {
 																return (function() { 
-	var el_to_match = get_form(fn_name, special_forms);
+	var el_to_match = get_form(fn_name, completions);
 	if (get_type(el_to_match) == 'Object') {
 		if ('gen' in el_to_match) {
 			var items = el_to_match.gen;
@@ -754,7 +754,7 @@ return merge(node, (function() {
 					if ("t" == el_to_match.active) {
 						if ('els' in el_to_match) {
 							var elems = el_to_match.els;
-							return {els: map((function(__partial_arg_0) { return post_triggers(__partial_arg_0)}), elems)};
+							return {els: map((function(__partial_arg_0) { return post_triggers(__partial_arg_0, completions)}), elems)};
 
 						}
 					}
@@ -766,7 +766,7 @@ return merge(node, (function() {
 	return {};
 })());
 };
-function get_completions(node) { 
+function get_completions(node, root) { 
 
 return (function() { 
 	var el_to_match = node;
@@ -789,7 +789,7 @@ return (function() {
 															return filter(function (form) { 
 
 return starts_with(fn_name, form.name);
-}, special_forms);
+}, concat(special_forms, get_fns_in_scope(root)));
 
 														}
 													}
@@ -813,7 +813,7 @@ return starts_with(fn_name, form.name);
 					if ("t" == el_to_match.active) {
 						if ('els' in el_to_match) {
 							var elems = el_to_match.els;
-							return flatten(map((function(__partial_arg_0) { return get_completions(__partial_arg_0)}), elems));
+							return flatten(map((function(__partial_arg_0) { return get_completions(__partial_arg_0, root)}), elems));
 
 						}
 					}
@@ -825,18 +825,107 @@ return starts_with(fn_name, form.name);
 	return [];
 })();
 };
+function get_fns_in_scope(node) { 
+
+return (function() { 
+	var el_to_match = node;
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
+			if ("root" == el_to_match.t) {
+				if ('els' in el_to_match) {
+					var elems = el_to_match.els;
+					return flatten(map(get_fns_in_scope, elems));
+
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
+			if ("List" == el_to_match.t) {
+				if ('active' in el_to_match) {
+					if ("t" == el_to_match.active) {
+						if ('els' in el_to_match) {
+							if (get_type(el_to_match.els) == 'Array') {
+								if (typeof el_to_match.els[0] != 'undefined') {
+									if (get_type(el_to_match.els[0]) == 'Object') {
+										if ('t' in el_to_match.els[0]) {
+											if ("Atom" == el_to_match.els[0].t) {
+												if ('val' in el_to_match.els[0]) {
+													if ("do" == el_to_match.els[0].val) {
+														var rest = el_to_match.els.slice(1);
+														return flatten(map(get_fns_in_scope, rest));
+
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
+			if ("List" == el_to_match.t) {
+				if ('els' in el_to_match) {
+					if (get_type(el_to_match.els) == 'Array') {
+						if (typeof el_to_match.els[0] != 'undefined') {
+							if (get_type(el_to_match.els[0]) == 'Object') {
+								if ('t' in el_to_match.els[0]) {
+									if ("Atom" == el_to_match.els[0].t) {
+										if ('val' in el_to_match.els[0]) {
+											if ("defn" == el_to_match.els[0].val) {
+												if (typeof el_to_match.els[1] != 'undefined') {
+													if (get_type(el_to_match.els[1]) == 'Object') {
+														if ('t' in el_to_match.els[1]) {
+															if ("Atom" == el_to_match.els[1].t) {
+																if ('val' in el_to_match.els[1]) {
+																	var name = el_to_match.els[1].val;
+																	if ('state' in el_to_match.els[1]) {
+																		if ("n" == el_to_match.els[1].state) {
+																			var rest = el_to_match.els.slice(2);
+																			return [{name: name, gen: map(function (arg) { 
+
+return gen_pending(arg.val);
+}, init(rest))}];
+
+																		}
+																	}
+																}
+															}
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return [];
+})();
+};
 ;
-var special_forms = [{name: "def", gen: [gen_atom("name"), gen_pending("value")]}, {name: "set", gen: [gen_atom("name"), gen_pending("value")]}, {name: "defn", gen: [gen_atom("name"), gen_atom("arg1"), gen_pending("body")]}, {name: "fn", gen: [gen_atom("arg1"), gen_pending("body")]}, {name: "if", gen: [gen_pending("cond"), gen_pending("else"), gen_pending("else")]}, {name: "nth", gen: [gen_pending("index"), gen_pending("array")]}, {name: "match", gen: [gen_pending("value"), gen_list([gen_pending("patt"), gen_pending("expr")])]}];
+var special_forms = [{name: "def", gen: [gen_atom("name"), gen_pending("value")]}, {name: "set", gen: [gen_atom("name"), gen_pending("value")]}, {name: "defn", gen: [gen_atom("name"), gen_atom("arg1"), gen_pending("body")]}, {name: "fn", gen: [gen_atom("arg1"), gen_pending("body")]}, {name: "if", gen: [gen_pending("cond"), gen_pending("else"), gen_pending("else")]}, {name: "nth", gen: [gen_pending("index"), gen_pending("array")]}, {name: "do", gen: [gen_list([gen_pending("...")])]}, {name: "match", gen: [gen_pending("value"), gen_list([gen_pending("patt"), gen_pending("expr")])]}];
 function get_form(name, forms) { 
 
 return find(function (form) { 
 
 return (function(a,b) { return a == b; })(form.name, name);
 }, forms);
-};
-function get_form_by(f, forms) { 
-
-return find(f, forms);
 };
 ;
 function gen_active_class(node) { 
@@ -1013,9 +1102,10 @@ return el.name;
 function update(node, input) { 
 
 return (function() { 
-root_node = post_triggers(update_node_multi(node, get_triggered_input(node, input)));
+var tmp_node = update_node_multi(node, get_triggered_input(node, input));
+completion_helper = get_completions(tmp_node, tmp_node);
+root_node = post_triggers(tmp_node, completion_helper);
 update_view(root_node);
-completion_helper = get_completions(root_node);
 return update_view_compl(completion_helper);
 })();
 };
