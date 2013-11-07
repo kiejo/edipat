@@ -168,13 +168,18 @@
 	(_ [])
 ))
 
+(defn take_with_fst_active els (match els
+	([] [])
+	([{active: "t"} & rest] [(head els)])
+	([el & rest] (cons el (take_with_fst_active rest)))))
+
 (defn get_fns_in_scope node
 	(match node
 		({t: "root" els: elems}
 			(flatten (map get_fns_in_scope elems)))
 
 		({t: "List" active: "t" els: [{t: "Atom" val: "do"} & rest]}
-			(flatten (map get_fns_in_scope rest)))
+			(flatten (map get_fns_in_scope (take_with_fst_active rest))))
 
 		({t: "List" els: [{t: "Atom" val: "defn"} {t: "Atom" val: name state: "n"} & rest]}
 			[{name: name gen: (map (fn arg (gen_pending (#val arg))) (init rest))}])
@@ -269,7 +274,7 @@
 	(set completion_helper (get_completions tmp_node tmp_node))
 
 	(set root_node (post_triggers tmp_node completion_helper))
-	
+
 	(update_view root_node)
 	(update_view_compl completion_helper)
 ))

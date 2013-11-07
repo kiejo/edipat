@@ -825,6 +825,40 @@ return starts_with(fn_name, form.name);
 	return [];
 })();
 };
+function take_with_fst_active(els) { 
+
+return (function() { 
+	var el_to_match = els;
+	if (get_type(el_to_match) == 'Array') {
+		if (el_to_match.length == 0) {
+			return [];
+
+		}
+	}
+
+	if (get_type(el_to_match) == 'Array') {
+		if (typeof el_to_match[0] != 'undefined') {
+			if (get_type(el_to_match[0]) == 'Object') {
+				if ('active' in el_to_match[0]) {
+					if ("t" == el_to_match[0].active) {
+						var rest = el_to_match.slice(1);
+						return [head(els)];
+
+					}
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Array') {
+		if (typeof el_to_match[0] != 'undefined') {
+			var el = el_to_match[0];
+			var rest = el_to_match.slice(1);
+			return cons(el, take_with_fst_active(rest));
+
+		}
+	}})();
+};
 function get_fns_in_scope(node) { 
 
 return (function() { 
@@ -855,7 +889,7 @@ return (function() {
 												if ('val' in el_to_match.els[0]) {
 													if ("do" == el_to_match.els[0].val) {
 														var rest = el_to_match.els.slice(1);
-														return flatten(map(get_fns_in_scope, rest));
+														return flatten(map(get_fns_in_scope, take_with_fst_active(rest)));
 
 													}
 												}
