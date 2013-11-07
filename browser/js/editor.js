@@ -132,6 +132,13 @@ function like_list(el) {
 
 return any((function(__partial_arg_1) { return (function(a,b) { return a == b; })(el, __partial_arg_1)}), ["root", "List", "Arr", "Obj", "Pair"]);
 };
+function non_active(els) { 
+
+return all(function (el) { 
+
+return !(is_active(el));
+}, els);
+};
 function contains_active_elem(els) { 
 
 return any(is_active, els);
@@ -163,10 +170,7 @@ return (function() {
 				if ('t' in el_to_match) {
 					if (((function(__partial_arg_0) { return like_list(__partial_arg_0)}))(el_to_match.t)) {
 						if ('els' in el_to_match) {
-							if (((function(__partial_arg_1) { return all(function (el) { 
-
-return !(is_active(el));
-}, __partial_arg_1)}))(el_to_match.els)) {
+							if (non_active(el_to_match.els)) {
 								return true;
 
 							}
@@ -835,6 +839,29 @@ function get_form_by(f, forms) {
 return find(f, forms);
 };
 ;
+function gen_active_class(node) { 
+
+return str(["active_", is_real_active(node)]);
+};
+function prepare_render(node) { 
+
+return merge(node, (function() { 
+	var el_to_match = node;
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
+			if (like_list(el_to_match.t)) {
+				if ('els' in el_to_match) {
+					var elems = el_to_match.els;
+					return {classes: [gen_active_class(node)], els: map(prepare_node, elems)};
+
+				}
+			}
+		}
+	}
+
+	return {classes: [gen_active_class(node)]};
+})());
+};
 function render(node) { 
 
 return (function() { 
@@ -857,10 +884,7 @@ return (function() {
 				if ('active' in el_to_match) {
 					if ("t" == el_to_match.active) {
 						if ('els' in el_to_match) {
-							if (((function(__partial_arg_1) { return all(function (el) { 
-
-return !(is_active(el));
-}, __partial_arg_1)}))(el_to_match.els)) {
+							if (non_active(el_to_match.els)) {
 								return wrap_span(str(["(", join(" ", map(render, node.els)), ")"]), "act_t");
 
 							}
@@ -942,12 +966,15 @@ function get_classes(prim) {
 return (function() { 
 	var el_to_match = prim;
 	if (get_type(el_to_match) == 'Object') {
-		if ('active' in el_to_match) {
-			var act = el_to_match.active;
-			if ('state' in el_to_match) {
-				var st = el_to_match.state;
-				return [str(["act_", act]), str(["st_", st])];
+		if ('t' in el_to_match) {
+			var type = el_to_match.t;
+			if ('active' in el_to_match) {
+				var act = el_to_match.active;
+				if ('state' in el_to_match) {
+					var st = el_to_match.state;
+					return [str(["type_", type]), str(["act_", act]), str(["st_", st])];
 
+				}
 			}
 		}
 	}

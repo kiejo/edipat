@@ -38,6 +38,9 @@
 
 (defn like_list el (any (== el _) ["root" "List" "Arr" "Obj" "Pair"]))
 
+(defn non_active els
+	(all (fn el (! (is_active el))) els))
+
 (defn contains_active_elem els (any is_active els))
 
 (defn is_type types el (any (== (#t el) _) types))
@@ -49,7 +52,7 @@
 
 (defn is_real_active el (match el
 	((is_active_type ["Atom" "Num" "Str" "pending"] _) true)
-	({active: "t" t: (like_list _) els: (all (fn el (! (is_active el))) _)} true)
+	({active: "t" t: (like_list _) els: (non_active)} true)
 	(_ false)))
 
 (defn contains_real_active els
@@ -186,12 +189,25 @@
 
 //renderer
 
+(defn gen_active_class node
+	(str ["active_" (is_real_active node)]))
+
+(defn prepare_render node
+	(merge node (match node
+
+		({t: (like_list) els: elems}
+			{ classes: [(gen_active_class node)] els: (map prepare_node elems) })
+
+		(_ { classes: [(gen_active_class node)] })
+	))
+)
+
 (defn render node (match node
 
 	({t: "root" els: elems}
 		(join "<br/>" (map render elems)))
 
-	({t: "List" active: "t" els: (all (fn el (! (is_active el))) _)}
+	({t: "List" active: "t" els: (non_active)}
 		(wrap_span (str ["(" (join " " (map render (#els node))) ")"]) "act_t"))
 
 	({t: "List" els: elems}
@@ -211,7 +227,7 @@
 ))
 
 (defn get_classes prim (match prim
-	({active: act state: st} [(str ["act_" act]) (str ["st_" st])])
+	({t: type, active: act state: st} [(str ["type_" type]) (str ["act_" act]) (str ["st_" st])])
 	(_ [])))
 
 (defn render_primitive prim

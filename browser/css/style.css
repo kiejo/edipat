@@ -58,3 +58,15 @@
 	border-radius: 4px;
 	opacity: 1;
 }
+
+.type_Str {
+	color: #542E02;
+}
+
+.type_Num {
+	color: #7D2300;
+}
+
+.type_Atom {
+	color: black;
+}
