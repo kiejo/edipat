@@ -144,22 +144,9 @@
 
 
 //auto complete
+//TODO: leverage check_defs 
 
 (defn is_state_pending el (== (#state el) "pending"))
-
-(defn post_triggers node completions
-	(merge node (match node
-		({t: "List" active: "t" els: [ { t: "Atom" val: fn_name active: "t" } & (all (is_state_pending _) _) ]}
-			(match (get_form fn_name completions)
-				({gen: items} { els: (cons (head (#els node)) (map (make_state_pending _) items)) })
-				(_            { els: [(head (#els node))] })))
-
-		({t: (like_list) active: "t" els: elems}
-			{ els: (map (post_triggers _ completions) elems) })
-
-		(_ {})
-	))
-)
 
 (defn get_completions node root (match node
 	({t: "List" active: "t" els: [ { t: "Atom" val: fn_name active: "t" } & rest ]}
@@ -196,27 +183,33 @@
 ))
 
 (defn get_def el (match el
-	({t: "List" els: [(is_def) {t: "Atom" val: name state: "n"} & rest]} name)
+	({t: "List" els: [(is_def) {t: "Atom" val: name state: "n"} & rest]}
+		{name: name gen: (map (fn arg (gen_pending (#val arg))) (init rest))})
 	(_ null)
 ))
 
-(defn get_defs els (map get_def els))
+(defn get_defs els (filter (!= null _) (map get_def els)))
 
 (defn check_defs node defs
 	(merge node (match node
 		({t: "root" els: elems}
 			{ els: (map (check_defs _ (concat defs (get_defs elems))) elems) })
 
+		({t: "List" active: "t" els: [ { t: "Atom" val: name active: "t" } & (all (is_state_pending _) _) ]}
+			(match (get_form name defs)
+				({gen: items} { els: (cons (merge (head (#els node)) { state: "n" }) (map (make_state_pending _) items)) })
+				(_            { els: [(merge (head (#els node)) { state: "undefined" })] })))
+
 		({t: "List" els: [{t: "Atom" val: "do"} & rest]}
 			{ els: (cons (head (#els node)) (map (check_defs _ (concat defs (get_defs rest))) rest)) })
 
 		({t: "List" els: [(is_def) {t: "Atom" val: name} & rest]}
-			{ els: (concat (init (#els node)) [(check_defs (last (#els node)) (concat defs (map (fn el (#val el)) (init (tail (#els node))))))]) })
+			{ els: (concat (init (#els node)) [(check_defs (last (#els node)) (concat defs (map (fn el {name: (#val el) gen: []}) (init (tail (#els node))))))]) })
 
 		({t: "Atom" val: name}
-			(if (any (== name _) defs)
-				{ state: "n" }
-				{ state: "undefined" }))
+			(match (get_form name defs)
+				({gen: _} { state: "n" })
+				(_        { state: "undefined" })))
 
 		({t: (like_list) els: elems}
 			{ els: (map (check_defs _ defs) elems) })
@@ -311,7 +304,7 @@
 	(def tmp_node (update_node_multi node (get_triggered_input node input)))
 	(set completion_helper (get_completions tmp_node tmp_node))
 
-	(set root_node (post_triggers (check_defs tmp_node (map (fn el (#name el)) special_forms)) completion_helper))
+	(set root_node (check_defs tmp_node special_forms))
 
 	(update_view root_node)
 	(update_view_compl completion_helper)
