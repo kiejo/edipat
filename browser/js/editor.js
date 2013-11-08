@@ -694,6 +694,7 @@ return merge(el, (function() {
 
 	}})());
 };
+;
 function is_state_pending(el) { 
 
 return (function(a,b) { return a == b; })(el.state, "pending");
@@ -825,40 +826,6 @@ return starts_with(fn_name, form.name);
 	return [];
 })();
 };
-function take_with_fst_active(els) { 
-
-return (function() { 
-	var el_to_match = els;
-	if (get_type(el_to_match) == 'Array') {
-		if (el_to_match.length == 0) {
-			return [];
-
-		}
-	}
-
-	if (get_type(el_to_match) == 'Array') {
-		if (typeof el_to_match[0] != 'undefined') {
-			if (get_type(el_to_match[0]) == 'Object') {
-				if ('active' in el_to_match[0]) {
-					if ("t" == el_to_match[0].active) {
-						var rest = el_to_match.slice(1);
-						return [head(els)];
-
-					}
-				}
-			}
-		}
-	}
-
-	if (get_type(el_to_match) == 'Array') {
-		if (typeof el_to_match[0] != 'undefined') {
-			var el = el_to_match[0];
-			var rest = el_to_match.slice(1);
-			return cons(el, take_with_fst_active(rest));
-
-		}
-	}})();
-};
 function get_fns_in_scope(node) { 
 
 return (function() { 
@@ -889,7 +856,7 @@ return (function() {
 												if ('val' in el_to_match.els[0]) {
 													if ("do" == el_to_match.els[0].val) {
 														var rest = el_to_match.els.slice(1);
-														return flatten(map(get_fns_in_scope, take_with_fst_active(rest)));
+														return flatten(map(get_fns_in_scope, rest));
 
 													}
 												}
@@ -951,6 +918,188 @@ return gen_pending(arg.val);
 
 	return [];
 })();
+};
+;
+function is_def(el) { 
+
+return (function() { 
+	var el_to_match = el;
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
+			if ("Atom" == el_to_match.t) {
+				if ('val' in el_to_match) {
+					if ("def" == el_to_match.val) {
+						return true;
+
+					}
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
+			if ("Atom" == el_to_match.t) {
+				if ('val' in el_to_match) {
+					if ("defn" == el_to_match.val) {
+						return true;
+
+					}
+				}
+			}
+		}
+	}
+
+	return false;
+})();
+};
+function get_def(el) { 
+
+return (function() { 
+	var el_to_match = el;
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
+			if ("List" == el_to_match.t) {
+				if ('els' in el_to_match) {
+					if (get_type(el_to_match.els) == 'Array') {
+						if (typeof el_to_match.els[0] != 'undefined') {
+							if (is_def(el_to_match.els[0])) {
+								if (typeof el_to_match.els[1] != 'undefined') {
+									if (get_type(el_to_match.els[1]) == 'Object') {
+										if ('t' in el_to_match.els[1]) {
+											if ("Atom" == el_to_match.els[1].t) {
+												if ('val' in el_to_match.els[1]) {
+													var name = el_to_match.els[1].val;
+													if ('state' in el_to_match.els[1]) {
+														if ("n" == el_to_match.els[1].state) {
+															var rest = el_to_match.els.slice(2);
+															return name;
+
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return null;
+})();
+};
+function get_defs(els) { 
+
+return map(get_def, els);
+};
+function check_defs(node, defs) { 
+
+return merge(node, (function() { 
+	var el_to_match = node;
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
+			if ("root" == el_to_match.t) {
+				if ('els' in el_to_match) {
+					var elems = el_to_match.els;
+					return {els: map((function(__partial_arg_0) { return check_defs(__partial_arg_0, concat(defs, get_defs(elems)))}), elems)};
+
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
+			if ("List" == el_to_match.t) {
+				if ('els' in el_to_match) {
+					if (get_type(el_to_match.els) == 'Array') {
+						if (typeof el_to_match.els[0] != 'undefined') {
+							if (get_type(el_to_match.els[0]) == 'Object') {
+								if ('t' in el_to_match.els[0]) {
+									if ("Atom" == el_to_match.els[0].t) {
+										if ('val' in el_to_match.els[0]) {
+											if ("do" == el_to_match.els[0].val) {
+												var rest = el_to_match.els.slice(1);
+												return {els: cons(head(node.els), map((function(__partial_arg_0) { return check_defs(__partial_arg_0, concat(defs, get_defs(rest)))}), rest))};
+
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
+			if ("List" == el_to_match.t) {
+				if ('els' in el_to_match) {
+					if (get_type(el_to_match.els) == 'Array') {
+						if (typeof el_to_match.els[0] != 'undefined') {
+							if (is_def(el_to_match.els[0])) {
+								if (typeof el_to_match.els[1] != 'undefined') {
+									if (get_type(el_to_match.els[1]) == 'Object') {
+										if ('t' in el_to_match.els[1]) {
+											if ("Atom" == el_to_match.els[1].t) {
+												if ('val' in el_to_match.els[1]) {
+													var name = el_to_match.els[1].val;
+													var rest = el_to_match.els.slice(2);
+													return {els: concat(init(node.els), [check_defs(last(node.els), concat(defs, map(function (el) { 
+
+return el.val;
+}, init(tail(node.els)))))])};
+
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
+			if ("Atom" == el_to_match.t) {
+				if ('val' in el_to_match) {
+					var name = el_to_match.val;
+					return (function() { 
+if (any((function(__partial_arg_1) { return (function(a,b) { return a == b; })(name, __partial_arg_1)}), defs)) { 
+return {state: "n"};} else { 
+return {state: "undefined"};}})();
+
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
+			if (like_list(el_to_match.t)) {
+				if ('els' in el_to_match) {
+					var elems = el_to_match.els;
+					return {els: map((function(__partial_arg_0) { return check_defs(__partial_arg_0, defs)}), elems)};
+
+				}
+			}
+		}
+	}
+
+	return {};
+})());
 };
 ;
 var special_forms = [{name: "def", gen: [gen_atom("name"), gen_pending("value")]}, {name: "set", gen: [gen_atom("name"), gen_pending("value")]}, {name: "defn", gen: [gen_atom("name"), gen_atom("arg1"), gen_pending("body")]}, {name: "fn", gen: [gen_atom("arg1"), gen_pending("body")]}, {name: "if", gen: [gen_pending("cond"), gen_pending("else"), gen_pending("else")]}, {name: "nth", gen: [gen_pending("index"), gen_pending("array")]}, {name: "do", gen: [gen_list([gen_pending("...")])]}, {name: "match", gen: [gen_pending("value"), gen_list([gen_pending("patt"), gen_pending("expr")])]}];
@@ -1138,7 +1287,10 @@ function update(node, input) {
 return (function() { 
 var tmp_node = update_node_multi(node, get_triggered_input(node, input));
 completion_helper = get_completions(tmp_node, tmp_node);
-root_node = post_triggers(tmp_node, completion_helper);
+root_node = post_triggers(check_defs(tmp_node, map(function (el) { 
+
+return el.name;
+}, special_forms)), completion_helper);
 update_view(root_node);
 return update_view_compl(completion_helper);
 })();

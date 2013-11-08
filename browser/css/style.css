@@ -53,6 +53,10 @@
 	opacity: 0.5;
 }
 
+.st_undefined {
+	border-bottom: 1px solid red;
+}
+
 .act_t {
 	background-color: rgba(59, 100, 255, 0.5);
 	border-radius: 4px;

@@ -142,6 +142,9 @@
 		({els: elems} { state: "pending" els: (map (make_state_pending _) elems) })
 		({}           { state: "pending" }))))
 
+
+//auto complete
+
 (defn is_state_pending el (== (#state el) "pending"))
 
 (defn post_triggers node completions
@@ -168,18 +171,13 @@
 	(_ [])
 ))
 
-(defn take_with_fst_active els (match els
-	([] [])
-	([{active: "t"} & rest] [(head els)])
-	([el & rest] (cons el (take_with_fst_active rest)))))
-
 (defn get_fns_in_scope node
 	(match node
 		({t: "root" els: elems}
 			(flatten (map get_fns_in_scope elems)))
 
 		({t: "List" active: "t" els: [{t: "Atom" val: "do"} & rest]}
-			(flatten (map get_fns_in_scope (take_with_fst_active rest))))
+			(flatten (map get_fns_in_scope rest)))
 
 		({t: "List" els: [{t: "Atom" val: "defn"} {t: "Atom" val: name state: "n"} & rest]}
 			[{name: name gen: (map (fn arg (gen_pending (#val arg))) (init rest))}])
@@ -187,6 +185,46 @@
 		(_ [])
 	)
 )
+
+
+//check if vars and fns are defined
+
+(defn is_def el (match el
+	({t: "Atom" val: "def"}  true)
+	({t: "Atom" val: "defn"} true)
+	(_ false)
+))
+
+(defn get_def el (match el
+	({t: "List" els: [(is_def) {t: "Atom" val: name state: "n"} & rest]} name)
+	(_ null)
+))
+
+(defn get_defs els (map get_def els))
+
+(defn check_defs node defs
+	(merge node (match node
+		({t: "root" els: elems}
+			{ els: (map (check_defs _ (concat defs (get_defs elems))) elems) })
+
+		({t: "List" els: [{t: "Atom" val: "do"} & rest]}
+			{ els: (cons (head (#els node)) (map (check_defs _ (concat defs (get_defs rest))) rest)) })
+
+		({t: "List" els: [(is_def) {t: "Atom" val: name} & rest]}
+			{ els: (concat (init (#els node)) [(check_defs (last (#els node)) (concat defs (map (fn el (#val el)) (init (tail (#els node))))))]) })
+
+		({t: "Atom" val: name}
+			(if (any (== name _) defs)
+				{ state: "n" }
+				{ state: "undefined" }))
+
+		({t: (like_list) els: elems}
+			{ els: (map (check_defs _ defs) elems) })
+
+		(_ {})
+	))
+)
+
 
 //special forms
 (def special_forms [
@@ -273,7 +311,7 @@
 	(def tmp_node (update_node_multi node (get_triggered_input node input)))
 	(set completion_helper (get_completions tmp_node tmp_node))
 
-	(set root_node (post_triggers tmp_node completion_helper))
+	(set root_node (post_triggers (check_defs tmp_node (map (fn el (#name el)) special_forms)) completion_helper))
 
 	(update_view root_node)
 	(update_view_compl completion_helper)
