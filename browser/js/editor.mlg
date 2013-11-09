@@ -143,38 +143,9 @@
 		({}           { state: "pending" }))))
 
 
-//auto complete
-//TODO: leverage check_defs 
+//check if vars and fns are defined, generate autocompletions for active node
 
 (defn is_state_pending el (== (#state el) "pending"))
-
-(defn get_completions node root (match node
-	({t: "List" active: "t" els: [ { t: "Atom" val: fn_name active: "t" } & rest ]}
-		(filter (fn form (starts_with fn_name (#name form))) (concat special_forms (get_fns_in_scope root))))
-
-	({t: (like_list) active: "t" els: elems}
-		(flatten (map (get_completions _ root) elems)))
-
-	(_ [])
-))
-
-(defn get_fns_in_scope node
-	(match node
-		({t: "root" els: elems}
-			(flatten (map get_fns_in_scope elems)))
-
-		({t: "List" active: "t" els: [{t: "Atom" val: "do"} & rest]}
-			(flatten (map get_fns_in_scope rest)))
-
-		({t: "List" els: [{t: "Atom" val: "defn"} {t: "Atom" val: name state: "n"} & rest]}
-			[{name: name gen: (map (fn arg (gen_pending (#val arg))) (init rest))}])
-
-		(_ [])
-	)
-)
-
-
-//check if vars and fns are defined
 
 (defn is_def el (match el
 	({t: "Atom" val: "def"}  true)
@@ -190,6 +161,15 @@
 
 (defn get_defs els (filter (!= null _) (map get_def els)))
 
+(defn filter_completions node compls
+	(filter (fn form (starts_with (#val node) (#name form))) compls))
+
+(defn get_completions node (match node
+	((is_real_active) (filter_completions node (|| (#completions node) [])))
+	({t: (like_list) active: "t" els: elems sel_el: sel_ind} (get_completions (nth sel_ind elems)))
+	(_ [])
+))
+
 (defn check_defs node defs
 	(merge node (match node
 		({t: "root" els: elems}
@@ -197,8 +177,8 @@
 
 		({t: "List" active: "t" els: [ { t: "Atom" val: name active: "t" } & (all (is_state_pending _) _) ]}
 			(match (get_form name defs)
-				({gen: items} { els: (cons (merge (head (#els node)) { state: "n" }) (map (make_state_pending _) items)) })
-				(_            { els: [(merge (head (#els node)) { state: "undefined" })] })))
+				({gen: items} { els: (cons (merge (head (#els node)) { completions: defs state: "n" }) (map (make_state_pending _) items)) })
+				(_            { els: [     (merge (head (#els node)) { completions: defs state: "undefined" })] })))
 
 		({t: "List" els: [{t: "Atom" val: "do"} & rest]}
 			{ els: (cons (head (#els node)) (map (check_defs _ (concat defs (get_defs rest))) rest)) })
@@ -208,8 +188,8 @@
 
 		({t: "Atom" val: name}
 			(match (get_form name defs)
-				({gen: _} { state: "n" })
-				(_        { state: "undefined" })))
+				({gen: _} { completions: defs state: "n" })
+				(_        { completions: defs state: "undefined" })))
 
 		({t: (like_list) els: elems}
 			{ els: (map (check_defs _ defs) elems) })
@@ -289,8 +269,6 @@
 
 (def root_node (activate (gen_root)))
 
-(def completion_helper [])
-
 (defn update_view node (do
 	(.text ($ "#ast") (.parse jsDump node))
 	(.html ($ "#rendered") (render node))
@@ -301,13 +279,10 @@
 ))
 
 (defn update node input (do
-	(def tmp_node (update_node_multi node (get_triggered_input node input)))
-	(set completion_helper (get_completions tmp_node tmp_node))
-
-	(set root_node (check_defs tmp_node special_forms))
-
+	(set root_node (check_defs (update_node_multi node (get_triggered_input node input)) special_forms))
 	(update_view root_node)
-	(update_view_compl completion_helper)
+
+	(update_view_compl (get_completions root_node))
 ))
 
 

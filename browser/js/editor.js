@@ -699,159 +699,6 @@ function is_state_pending(el) {
 
 return (function(a,b) { return a == b; })(el.state, "pending");
 };
-function get_completions(node, root) { 
-
-return (function() { 
-	var el_to_match = node;
-	if (get_type(el_to_match) == 'Object') {
-		if ('t' in el_to_match) {
-			if ("List" == el_to_match.t) {
-				if ('active' in el_to_match) {
-					if ("t" == el_to_match.active) {
-						if ('els' in el_to_match) {
-							if (get_type(el_to_match.els) == 'Array') {
-								if (typeof el_to_match.els[0] != 'undefined') {
-									if (get_type(el_to_match.els[0]) == 'Object') {
-										if ('t' in el_to_match.els[0]) {
-											if ("Atom" == el_to_match.els[0].t) {
-												if ('val' in el_to_match.els[0]) {
-													var fn_name = el_to_match.els[0].val;
-													if ('active' in el_to_match.els[0]) {
-														if ("t" == el_to_match.els[0].active) {
-															var rest = el_to_match.els.slice(1);
-															return filter(function (form) { 
-
-return starts_with(fn_name, form.name);
-}, concat(special_forms, get_fns_in_scope(root)));
-
-														}
-													}
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	if (get_type(el_to_match) == 'Object') {
-		if ('t' in el_to_match) {
-			if (like_list(el_to_match.t)) {
-				if ('active' in el_to_match) {
-					if ("t" == el_to_match.active) {
-						if ('els' in el_to_match) {
-							var elems = el_to_match.els;
-							return flatten(map((function(__partial_arg_0) { return get_completions(__partial_arg_0, root)}), elems));
-
-						}
-					}
-				}
-			}
-		}
-	}
-
-	return [];
-})();
-};
-function get_fns_in_scope(node) { 
-
-return (function() { 
-	var el_to_match = node;
-	if (get_type(el_to_match) == 'Object') {
-		if ('t' in el_to_match) {
-			if ("root" == el_to_match.t) {
-				if ('els' in el_to_match) {
-					var elems = el_to_match.els;
-					return flatten(map(get_fns_in_scope, elems));
-
-				}
-			}
-		}
-	}
-
-	if (get_type(el_to_match) == 'Object') {
-		if ('t' in el_to_match) {
-			if ("List" == el_to_match.t) {
-				if ('active' in el_to_match) {
-					if ("t" == el_to_match.active) {
-						if ('els' in el_to_match) {
-							if (get_type(el_to_match.els) == 'Array') {
-								if (typeof el_to_match.els[0] != 'undefined') {
-									if (get_type(el_to_match.els[0]) == 'Object') {
-										if ('t' in el_to_match.els[0]) {
-											if ("Atom" == el_to_match.els[0].t) {
-												if ('val' in el_to_match.els[0]) {
-													if ("do" == el_to_match.els[0].val) {
-														var rest = el_to_match.els.slice(1);
-														return flatten(map(get_fns_in_scope, rest));
-
-													}
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	if (get_type(el_to_match) == 'Object') {
-		if ('t' in el_to_match) {
-			if ("List" == el_to_match.t) {
-				if ('els' in el_to_match) {
-					if (get_type(el_to_match.els) == 'Array') {
-						if (typeof el_to_match.els[0] != 'undefined') {
-							if (get_type(el_to_match.els[0]) == 'Object') {
-								if ('t' in el_to_match.els[0]) {
-									if ("Atom" == el_to_match.els[0].t) {
-										if ('val' in el_to_match.els[0]) {
-											if ("defn" == el_to_match.els[0].val) {
-												if (typeof el_to_match.els[1] != 'undefined') {
-													if (get_type(el_to_match.els[1]) == 'Object') {
-														if ('t' in el_to_match.els[1]) {
-															if ("Atom" == el_to_match.els[1].t) {
-																if ('val' in el_to_match.els[1]) {
-																	var name = el_to_match.els[1].val;
-																	if ('state' in el_to_match.els[1]) {
-																		if ("n" == el_to_match.els[1].state) {
-																			var rest = el_to_match.els.slice(2);
-																			return [{name: name, gen: map(function (arg) { 
-
-return gen_pending(arg.val);
-}, init(rest))}];
-
-																		}
-																	}
-																}
-															}
-														}
-													}
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	return [];
-})();
-};
-;
 function is_def(el) { 
 
 return (function() { 
@@ -932,6 +779,44 @@ function get_defs(els) {
 
 return filter((function(__partial_arg_1) { return (function(a,b) { return a != b; })(null, __partial_arg_1)}), map(get_def, els));
 };
+function filter_completions(node, compls) { 
+
+return filter(function (form) { 
+
+return starts_with(node.val, form.name);
+}, compls);
+};
+function get_completions(node) { 
+
+return (function() { 
+	var el_to_match = node;
+	if (is_real_active(el_to_match)) {
+		return filter_completions(node, (function(a,b) { return a || b; })(node.completions, []));
+
+	}
+
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
+			if (like_list(el_to_match.t)) {
+				if ('active' in el_to_match) {
+					if ("t" == el_to_match.active) {
+						if ('els' in el_to_match) {
+							var elems = el_to_match.els;
+							if ('sel_el' in el_to_match) {
+								var sel_ind = el_to_match.sel_el;
+								return get_completions(elems[sel_ind]);
+
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return [];
+})();
+};
 function check_defs(node, defs) { 
 
 return merge(node, (function() { 
@@ -969,12 +854,12 @@ return merge(node, (function() {
 	if (get_type(el_to_match) == 'Object') {
 		if ('gen' in el_to_match) {
 			var items = el_to_match.gen;
-			return {els: cons(merge(head(node.els), {state: "n"}), map((function(__partial_arg_0) { return make_state_pending(__partial_arg_0)}), items))};
+			return {els: cons(merge(head(node.els), {completions: defs, state: "n"}), map((function(__partial_arg_0) { return make_state_pending(__partial_arg_0)}), items))};
 
 		}
 	}
 
-	return {els: [merge(head(node.els), {state: "undefined"})]};
+	return {els: [merge(head(node.els), {completions: defs, state: "undefined"})]};
 })();
 
 															}
@@ -1060,12 +945,12 @@ return {name: el.val, gen: []};
 	var el_to_match = get_form(name, defs);
 	if (get_type(el_to_match) == 'Object') {
 		if ('gen' in el_to_match) {
-			return {state: "n"};
+			return {completions: defs, state: "n"};
 
 		}
 	}
 
-	return {state: "undefined"};
+	return {completions: defs, state: "undefined"};
 })();
 
 				}
@@ -1251,7 +1136,6 @@ return str(["<span class='", cl, "'>", cont, "</span>"]);
 };
 ;
 var root_node = activate(gen_root());
-var completion_helper = [];
 function update_view(node) { 
 
 return (function() { 
@@ -1272,11 +1156,9 @@ return el.name;
 function update(node, input) { 
 
 return (function() { 
-var tmp_node = update_node_multi(node, get_triggered_input(node, input));
-completion_helper = get_completions(tmp_node, tmp_node);
-root_node = check_defs(tmp_node, special_forms);
+root_node = check_defs(update_node_multi(node, get_triggered_input(node, input)), special_forms);
 update_view(root_node);
-return update_view_compl(completion_helper);
+return update_view_compl(get_completions(root_node));
 })();
 };
 ;
