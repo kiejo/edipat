@@ -212,6 +212,10 @@
 	{ name: "match" gen: [ (gen_pending "value") (gen_list [(gen_pending "patt") (gen_pending "expr")]) ] }
 ])
 
+(def built_in_binops
+	(map (fn op { name: op gen: [ (gen_pending "a") (gen_pending "b") ]}) [ "+" "-" "*" "/" "%" "==" "!=" ">" ">=" "<" "<=" "&&" "||" ]))
+
+
 (defn get_form name forms
 	(find (fn form (== (#name form) name)) forms))
 
@@ -279,7 +283,7 @@
 ))
 
 (defn update node input (do
-	(set root_node (check_defs (update_node_multi node (get_triggered_input node input)) special_forms))
+	(set root_node (check_defs (update_node_multi node (get_triggered_input node input)) (foldl [] concat [special_forms built_in_binops])))
 	(update_view root_node)
 
 	(update_view_compl (get_completions root_node))
