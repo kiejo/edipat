@@ -191,6 +191,9 @@
 				({gen: _} { completions: defs state: "n" })
 				(_        { completions: defs state: "undefined" })))
 
+		({t: "Pair" els: [key value]}
+			{ els: [key (check_defs value defs)] })
+
 		({t: (like_list) els: elems}
 			{ els: (map (check_defs _ defs) elems) })
 

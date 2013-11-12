@@ -960,6 +960,45 @@ return {name: el.val, gen: []};
 
 	if (get_type(el_to_match) == 'Object') {
 		if ('t' in el_to_match) {
+			if ("pending" == el_to_match.t) {
+				if ('val' in el_to_match) {
+					var name = el_to_match.val;
+					return (function() { 
+	var el_to_match = get_form(name, defs);
+	if (get_type(el_to_match) == 'Object') {
+		if ('gen' in el_to_match) {
+			return {completions: defs, state: "n"};
+
+		}
+	}
+
+	return {completions: defs, state: "undefined"};
+})();
+
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
+			if ("Pair" == el_to_match.t) {
+				if ('els' in el_to_match) {
+					if (get_type(el_to_match.els) == 'Array') {
+						if (el_to_match.els.length == 2) {
+							var key = el_to_match.els[0];
+							var value = el_to_match.els[1];
+							return {els: [key, check_defs(value, defs)]};
+
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
 			if (like_list(el_to_match.t)) {
 				if ('els' in el_to_match) {
 					var elems = el_to_match.els;
