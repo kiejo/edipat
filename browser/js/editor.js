@@ -646,7 +646,9 @@ return el_ind;}})()};
 					if ("t" == el_to_match.active) {
 						if ('val' in el_to_match) {
 							var value = el_to_match.val;
-							return (function() { 
+							if ('completions' in el_to_match) {
+								var compls = el_to_match.completions;
+								return (function() { 
 	var el_to_match = input;
 	if ("uarr" == el_to_match) {
 		return {active: "f"};
@@ -658,11 +660,20 @@ return el_ind;}})()};
 
 	}
 
+	if ("tab" == el_to_match) {
+		return {val: (function() { 
+if (empty(compls)) { 
+return value;} else { 
+return head(compls).name;}})()};
+
+	}
+
 	if (is_atom(el_to_match)) {
 		return {val: (function(a,b) { return a + b; })(value, input)};
 
 	}})();
 
+							}
 						}
 					}
 				}
@@ -835,6 +846,28 @@ return merge(node, (function() {
 
 	if (get_type(el_to_match) == 'Object') {
 		if ('t' in el_to_match) {
+			if ("Atom" == el_to_match.t) {
+				if ('val' in el_to_match) {
+					var name = el_to_match.val;
+					return (function() { 
+	var el_to_match = get_form(name, defs);
+	if (get_type(el_to_match) == 'Object') {
+		if ('gen' in el_to_match) {
+			return {completions: defs, state: "n"};
+
+		}
+	}
+
+	return {completions: defs, state: "undefined"};
+})();
+
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
 			if ("List" == el_to_match.t) {
 				if ('active' in el_to_match) {
 					if ("t" == el_to_match.active) {
@@ -931,50 +964,6 @@ return {name: el.val, gen: []};
 							}
 						}
 					}
-				}
-			}
-		}
-	}
-
-	if (get_type(el_to_match) == 'Object') {
-		if ('t' in el_to_match) {
-			if ("Atom" == el_to_match.t) {
-				if ('val' in el_to_match) {
-					var name = el_to_match.val;
-					return (function() { 
-	var el_to_match = get_form(name, defs);
-	if (get_type(el_to_match) == 'Object') {
-		if ('gen' in el_to_match) {
-			return {completions: defs, state: "n"};
-
-		}
-	}
-
-	return {completions: defs, state: "undefined"};
-})();
-
-				}
-			}
-		}
-	}
-
-	if (get_type(el_to_match) == 'Object') {
-		if ('t' in el_to_match) {
-			if ("pending" == el_to_match.t) {
-				if ('val' in el_to_match) {
-					var name = el_to_match.val;
-					return (function() { 
-	var el_to_match = get_form(name, defs);
-	if (get_type(el_to_match) == 'Object') {
-		if ('gen' in el_to_match) {
-			return {completions: defs, state: "n"};
-
-		}
-	}
-
-	return {completions: defs, state: "undefined"};
-})();
-
 				}
 			}
 		}
@@ -1205,7 +1194,6 @@ return update_view_compl(get_completions(root_node));
 })();
 };
 ;
-var special_input = [[8, "bs"], [37, "larr"], [38, "uarr"], [39, "rarr"], [9, "tab"], [40, "darr"], [46, "del"]];
 function is_num(input) { 
 
 return any((function(__partial_arg_1) { return (function(a,b) { return a == b; })(input, __partial_arg_1)}), map(function (n) { 
@@ -1229,19 +1217,7 @@ return (function() {
 }, special_input));
 };
 ;
-function handle_keydown(handler, key_event) { 
-
-return (function() { 
-	var el_to_match = kd_keycode_to_s(special_input, key_event.which);
-	if ("not_matched" == el_to_match) {
-		return undefined;
-
-	}
-
-	var s = el_to_match;
-	return handler(s);
-})();
-};
+var special_input = [[8, "bs"], [37, "larr"], [38, "uarr"], [39, "rarr"], [9, "tab"], [40, "darr"], [46, "del"]];
 function kd_keycode_to_s(pairs, kc) { 
 
 return (function() { 
@@ -1269,9 +1245,30 @@ return (function() {
 	return "not_matched";
 })();
 };
+;
+function handle_keydown(handler, key_event) { 
+
+return (function() { 
+	var el_to_match = kd_keycode_to_s(special_input, key_event.which);
+	if ("not_matched" == el_to_match) {
+		return undefined;
+
+	}
+
+	var s = el_to_match;
+	return (function() { 
+handler(s);
+return key_event.preventDefault();
+})();
+})();
+};
+;
 function handle_keypress(handler, key_event) { 
 
-return handler(String.fromCharCode(key_event.which));
+return (function() { 
+handler(String.fromCharCode(key_event.which));
+return key_event.preventDefault();
+})();
 };
 $(document).ready(function () { 
 
@@ -1279,6 +1276,8 @@ return (function() {
 update(root_node, "darr");
 ;
 $("#input").keydown((function(__partial_arg_1) { return handle_keydown((function(__partial_arg_1) { return update(root_node, __partial_arg_1)}), __partial_arg_1)}));
-return $("#input").keypress((function(__partial_arg_1) { return handle_keypress((function(__partial_arg_1) { return update(root_node, __partial_arg_1)}), __partial_arg_1)}));
+;
+$("#input").keypress((function(__partial_arg_1) { return handle_keypress((function(__partial_arg_1) { return update(root_node, __partial_arg_1)}), __partial_arg_1)}));
+return ;
 })();
 });

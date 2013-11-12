@@ -124,10 +124,11 @@
 				("uarr"    { active: "f" })
 				((is_atom) { val: input state: "n"})))
 
-		({t: "Atom" active: "t" val: value}
+		({t: "Atom" active: "t" val: value completions: compls}
 			(match input
 				("uarr"    { active: "f" })
 				("bs"      { val: (init value) })
+				("tab"     { val: (if (empty compls) value (#name (head compls))) })
 				((is_atom) { val: (+ value input) })))
 
 		(_ {})
@@ -175,6 +176,11 @@
 		({t: "root" els: elems}
 			{ els: (map (check_defs _ (concat defs (get_defs elems))) elems) })
 
+		({t: "Atom" val: name}
+			(match (get_form name defs)
+				({gen: _} { completions: defs state: "n" })
+				(_        { completions: defs state: "undefined" })))
+
 		({t: "List" active: "t" els: [ { t: "Atom" val: name active: "t" } & (all (is_state_pending _) _) ]}
 			(match (get_form name defs)
 				({gen: items} { els: (cons (merge (head (#els node)) { completions: defs state: "n" }) (map (make_state_pending _) items)) })
@@ -186,11 +192,6 @@
 		({t: "List" els: [(is_def) {t: "Atom" val: name} & rest]}
 			{ els: (concat (init (#els node)) [(check_defs (last (#els node)) (concat defs (map (fn el {name: (#val el) gen: []}) (init (tail (#els node))))))]) })
 
-		({t: "Atom" val: name}
-			(match (get_form name defs)
-				({gen: _} { completions: defs state: "n" })
-				(_        { completions: defs state: "undefined" })))
-
 		({t: "Pair" els: [key value]}
 			{ els: [key (check_defs value defs)] })
 
@@ -200,7 +201,6 @@
 		(_ {})
 	))
 )
-
 
 //special forms
 (def special_forms [
@@ -295,6 +295,13 @@
 
 //input handling
 
+(defn is_num input (any (== input _) (map (fn n (.toString n)) (range 0 9))))
+
+(defn is_atom input (! (any (fn pair (match pair ([_ s] (== s input)))) special_input)))
+
+
+//make sure input only triggers one of the two possible events and normalize keycode to string/char
+
 (def special_input [
 	[8  "bs"]
 	[37 "larr"]
@@ -305,32 +312,30 @@
 	[46 "del"]
 ])
 
-(defn is_num input (any (== input _) (map (fn n (.toString n)) (range 0 9))))
-
-(defn is_atom input (! (any (fn pair (match pair ([_ s] (== s input)))) special_input)))
-
-
-//make sure input only triggers one of the two possible events and normalize keycode to string/char
-
-(defn handle_keydown handler key_event
-	(match (kd_keycode_to_s special_input (#which key_event))
-		("not_matched" undefined)
-		(s (handler s))))
-
 (defn kd_keycode_to_s pairs kc
 	(match (find (fn pair (match pair ([code s] (== code kc)))) pairs)
 		([_ s] s)
-		(_     "not_matched")
-))
+		(_     "not_matched")))
 
-(defn handle_keypress handler key_event
-	(handler (.fromCharCode String (#which key_event))))
+//handle special keys (eg arr, tab)
+(defn handle_keydown handler key_event
+	(match (kd_keycode_to_s special_input (#which key_event))
+		("not_matched" undefined)
+		(s (do
+			(handler s)
+			(.preventDefault key_event)))))
+
+//handle characters
+(defn handle_keypress handler key_event (do
+	(handler (.fromCharCode String (#which key_event)))
+	(.preventDefault key_event)
+))
 
 (.ready ($ document) (fn (do
 
 	(update root_node "darr") //activate first child
 
-	(.keydown  ($ "#input") (handle_keydown  (update root_node _) _))
-	(.keypress ($ "#input") (handle_keypress (update root_node _) _))
+	(.keydown  ($ "#input") (handle_keydown  (update root_node _) _)) //triggered for every key
+	(.keypress ($ "#input") (handle_keypress (update root_node _) _)) //only guaranteed for characters
 
 )))
