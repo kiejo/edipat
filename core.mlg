@@ -31,6 +31,11 @@
 				 	(cons x (filter f rest))
 					(filter f rest)))))
 
+(defn take n xs (match [n xs]
+	([0 _]  [])
+	([_ []] [])
+	([a [x & rest]] (cons x (take (dec a) rest)))))
+
 (defn foldl acc f xs
 	(if (empty xs)
 		acc

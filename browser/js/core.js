@@ -70,6 +70,44 @@ return filter(f, rest);}})();
 		}
 	}})();
 };
+function take(n, xs) { 
+
+return (function() { 
+	var el_to_match = [n, xs];
+	if (get_type(el_to_match) == 'Array') {
+		if (el_to_match.length == 2) {
+			if (0 == el_to_match[0]) {
+				return [];
+
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Array') {
+		if (el_to_match.length == 2) {
+			if (get_type(el_to_match[1]) == 'Array') {
+				if (el_to_match[1].length == 0) {
+					return [];
+
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Array') {
+		if (el_to_match.length == 2) {
+			var a = el_to_match[0];
+			if (get_type(el_to_match[1]) == 'Array') {
+				if (typeof el_to_match[1][0] != 'undefined') {
+					var x = el_to_match[1][0];
+					var rest = el_to_match[1].slice(1);
+					return cons(x, take(dec(a), rest));
+
+				}
+			}
+		}
+	}})();
+};
 function foldl(acc, f, xs) { 
 
 return (function() { 
