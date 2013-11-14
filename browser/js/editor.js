@@ -7,9 +7,12 @@ function gen_type_with_val(type, value) {
 
 return {t: type, val: value, state: "n", active: "f", is_defined: "t"};
 };
-var gen_pending = (function(__partial_arg_1) { return gen_type_with_val("pending", __partial_arg_1)});
 var gen_num = (function(__partial_arg_1) { return gen_type_with_val("Num", __partial_arg_1)});
 var gen_str = (function(__partial_arg_1) { return gen_type_with_val("Str", __partial_arg_1)});
+function gen_pending(value) { 
+
+return merge(gen_type_with_val("pending", value), {in_scope: []});
+};
 function gen_atom(value) { 
 
 return merge(gen_type_with_val("Atom", value), {in_scope: []});
@@ -235,7 +238,7 @@ return (function() {
 							if ('active' in el_to_match[1]) {
 								if ("t" == el_to_match[1].active) {
 									if ('els' in el_to_match[1]) {
-										if (((function(__partial_arg_1) { return contains_active_type(["Atom", "Num"], __partial_arg_1)}))(el_to_match[1].els)) {
+										if (((function(__partial_arg_1) { return contains_active_type(["Atom", "Num", "Str", "pending", "List"], __partial_arg_1)}))(el_to_match[1].els)) {
 											return ["uarr", " "];
 
 										}
@@ -452,7 +455,7 @@ return {active: "f"};}})();
 	if ("del" == el_to_match) {
 		return {els: remove_nth(el_ind, elems), sel_el: (function() { 
 if ((function(a,b) { return a == b; })(elems.length, inc(el_ind))) { 
-return dec(el_ind);} else { 
+return max(dec(el_ind), 0);} else { 
 return el_ind;}})()};
 
 	}

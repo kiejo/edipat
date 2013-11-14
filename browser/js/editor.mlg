@@ -3,10 +3,10 @@
 (defn gen_root (gen_type_with_els "root" [(gen_pending "...")]))
 
 (defn gen_type_with_val type value { t: type val: value state: "n" active: "f" is_defined: "t" })
-(def gen_pending (gen_type_with_val "pending" _))
 (def gen_num     (gen_type_with_val "Num" _))
 (def gen_str     (gen_type_with_val "Str" _))
 
+(defn gen_pending value (merge (gen_type_with_val "pending" value) { in_scope: [] }))
 (defn gen_atom value (merge (gen_type_with_val "Atom" value) { in_scope: [] }))
 
 (defn gen_type_with_els type els { t: type els: els sel_el: 0 state: "n" active: "f" })
@@ -62,7 +62,7 @@
 
 		([")" {t: "List" active: "t" els: (contains_real_active _)}] ["uarr" "uarr" " "])
 
-		(["ret" {t: (like_list) active: "t" els: (contains_active_type ["Atom" "Num"] _)}] ["uarr" " "])
+		(["ret" {t: (like_list) active: "t" els: (contains_active_type ["Atom" "Num" "Str" "pending" "List"] _)}] ["uarr" " "])
 		(["'" {t: (like_list) active: "t" els: (contains_active_type ["Str"] _)}]        ["uarr" " "])
 
 		(["larr" {t: (like_list) active: "t" els: (contains_active_type ["Atom" "Num" "Str" "pending" "List"] _)}] ["uarr" "larr" "darr"])
@@ -88,7 +88,7 @@
 				("rarr" { sel_el: (mod (inc el_ind) (#length (#els node))) })
 				("uarr" (if (== (#t node) "root") {} { active: "f" }))
 				("darr" { els: (activate_nth el_ind elems) })
-				("del"  { els: (remove_nth   el_ind elems) sel_el: (if (== (#length elems) (inc el_ind)) (dec el_ind) el_ind) })
+				("del"  { els: (remove_nth   el_ind elems) sel_el: (if (== (#length elems) (inc el_ind)) (max (dec el_ind) 0) el_ind) })
 				(" "    { els: (insert_at (inc el_ind) (activate (gen_pending "...")) (deactivate_all elems)) sel_el: (inc el_ind) })
 				(_  {})))
 
