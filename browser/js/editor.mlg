@@ -211,6 +211,8 @@
 	))
 )
 
+//TODO: difference between state undefinded, pending, n etc
+
 //special forms
 (def special_forms [
 	{ name: "def"  gen: [ (gen_atom "name") (gen_pending "value") ] }
@@ -344,7 +346,9 @@
 
 	(update root_node "darr") //activate first child
 
-	(.keydown  ($ "#input") (handle_keydown  (update root_node _) _)) //triggered for every key
-	(.keypress ($ "#input") (handle_keypress (update root_node _) _)) //only guaranteed for characters
+	(.keydown  ($ "#rendered") (handle_keydown  (update root_node _) _)) //triggered for every key
+	(.keypress ($ "#rendered") (handle_keypress (update root_node _) _)) //only guaranteed for characters
+
+	(.focus ($ "#rendered"))
 
 )))

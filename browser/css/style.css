@@ -4,11 +4,7 @@
 }
 
 #grammar-wrapper {
-	width: 5%;
-}
-
-#input-wrapper {
-	width: 10%;
+	display: none;
 }
 
 #ast-wrapper {
@@ -43,6 +39,10 @@
 
 #compile {
 	margin-top: 30px;
+}
+
+#completions {
+	border: solid 1px blue;
 }
 
 
