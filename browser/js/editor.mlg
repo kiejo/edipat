@@ -65,10 +65,11 @@
 		(["ret" {t: (like_list) active: "t" els: (contains_active_type ["Atom" "Num" "Str" "pending" "List"] _)}] ["uarr" " "])
 		(["'" {t: (like_list) active: "t" els: (contains_active_type ["Str"] _)}]        ["uarr" " "])
 
-		(["larr" {t: (like_list) active: "t" els: (contains_active_type ["Atom" "Num" "Str" "pending" "List"] _)}] ["uarr" "larr" "darr"])
-		(["rarr" {t: (like_list) active: "t" els: (contains_active_type ["Atom" "Num" "Str" "pending" "List"] _)}] ["uarr" "rarr" "darr"])
-		([" "    {t: (like_list) active: "t" els: (contains_active_type ["Atom" "Num" "Str" "pending" "List"] _)}] ["uarr" "rarr" "darr"])
-		(["del"  {t: (like_list) active: "t" els: (contains_active_type ["Atom" "Num" "Str" "pending" "List"] _)}] ["uarr" "del"  "darr"])
+		(["larr" {t: (like_list) active: "t" els: (contains_real_active _)}] ["uarr" "larr" "darr"])
+		(["rarr" {t: (like_list) active: "t" els: (contains_real_active _)}] ["uarr" "rarr" "darr"])
+		([" "    {t: (like_list) active: "t" els: (contains_real_active _)}] ["uarr" "rarr" "darr"])
+		(["del"  {t: (like_list) active: "t" els: [ (is_real_active _) ]}]   ["uarr" "del"])
+		(["del"  {t: (like_list) active: "t" els: (contains_real_active _)}] ["uarr" "del"  "darr"])
 
 		([_ {t: (like_list) active: "t" els: (contains_active_elem) sel_el: el_ind}]
 			(get_triggered_input (nth el_ind (#els node)) input))
@@ -87,7 +88,7 @@
 				("larr" { sel_el: (mod (dec el_ind) (#length (#els node))) })
 				("rarr" { sel_el: (mod (inc el_ind) (#length (#els node))) })
 				("uarr" (if (== (#t node) "root") {} { active: "f" }))
-				("darr" { els: (activate_nth el_ind elems) })
+				("darr" { els: (if (empty elems) [(activate (gen_pending "..."))] (activate_nth el_ind elems)) })
 				("del"  { els: (remove_nth   el_ind elems) sel_el: (if (== (#length elems) (inc el_ind)) (max (dec el_ind) 0) el_ind) })
 				(" "    { els: (insert_at (inc el_ind) (activate (gen_pending "...")) (deactivate_all elems)) sel_el: (inc el_ind) })
 				(_  {})))
