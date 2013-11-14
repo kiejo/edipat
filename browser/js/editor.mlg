@@ -2,7 +2,7 @@
 
 (defn gen_root (gen_type_with_els "root" [(gen_pending "...")]))
 
-(defn gen_type_with_val type value { t: type val: value state: "n" active: "f" })
+(defn gen_type_with_val type value { t: type val: value state: "n" active: "f" is_defined: "t" })
 (def gen_pending (gen_type_with_val "pending" _))
 (def gen_num     (gen_type_with_val "Num" _))
 (def gen_str     (gen_type_with_val "Str" _))
@@ -28,11 +28,6 @@
 	([0 []]          [])
 	([0 [el & rest]] (cons (activate el) rest))
 	([i [el & rest]] (cons el (activate_nth (dec i) rest)))))
-
-(defn remove_nth n els (match [n els]
-	([0 []]          [])
-	([0 [el & rest]] rest)
-	([i [el & rest]] (cons el (remove_nth (dec i) rest)))))
 
 (defn deactivate_all els
 	(map (merge _ { active: "f" }) els))
@@ -67,11 +62,12 @@
 
 		([")" {t: "List" active: "t" els: (contains_real_active _)}] ["uarr" "uarr" " "])
 
-		([" " {t: (like_list) active: "t" els: (contains_active_type ["Atom" "Num"] _)}] ["uarr" " "])
+		(["ret" {t: (like_list) active: "t" els: (contains_active_type ["Atom" "Num"] _)}] ["uarr" " "])
 		(["'" {t: (like_list) active: "t" els: (contains_active_type ["Str"] _)}]        ["uarr" " "])
 
 		(["larr" {t: (like_list) active: "t" els: (contains_active_type ["Atom" "Num" "Str" "pending" "List"] _)}] ["uarr" "larr" "darr"])
 		(["rarr" {t: (like_list) active: "t" els: (contains_active_type ["Atom" "Num" "Str" "pending" "List"] _)}] ["uarr" "rarr" "darr"])
+		([" "    {t: (like_list) active: "t" els: (contains_active_type ["Atom" "Num" "Str" "pending" "List"] _)}] ["uarr" "rarr" "darr"])
 		(["del"  {t: (like_list) active: "t" els: (contains_active_type ["Atom" "Num" "Str" "pending" "List"] _)}] ["uarr" "del"  "darr"])
 
 		([_ {t: (like_list) active: "t" els: (contains_active_elem) sel_el: el_ind}]
@@ -100,10 +96,10 @@
 			(match input
 				("uarr"    { active: "f" })
 				("'"       (activate (gen_str "")))
-				("["       (activate (gen_arr  [(activate (gen_pending "el"))])))
-				("("       (activate (gen_list [(activate (gen_pending "el"))])))
-				("{"       (activate (gen_obj  [(activate (gen_pair [(activate (gen_atom "key")) (gen_pending "el")]))])))
-				(":"       (activate (gen_pair [(activate (gen_atom "key")) (gen_pending "el")])))
+				("["       (activate (gen_arr  [(activate (gen_pending "..."))])))
+				("("       (activate (gen_list [(activate (gen_pending "..."))])))
+				("{"       (activate (gen_obj  [(activate (gen_pair [(make_state_pending (activate (gen_atom "key"))) (gen_pending "...")]))])))
+				(":"       (activate (gen_pair [(activate (gen_atom "key")) (gen_pending "...")])))
 				((is_num)  (activate (gen_num input)))
 				((is_atom) (activate (gen_atom input)))))
 
@@ -128,7 +124,7 @@
 		({t: "Atom" active: "t" val: value in_scope: defs}
 			(match input
 				("uarr"    { active: "f" })
-				("bs"      { val: (init value) })
+				("bs"      (if (== (#length (init value)) 0) (activate (gen_pending "...")) { val: (init value) }))
 				("tab"     { val: (if (empty defs) value (#name (head (get_completions node defs)))) })
 				((is_atom) { val: (+ value input) })))
 
@@ -163,8 +159,11 @@
 
 (defn get_defs els (filter (!= null _) (map get_def els)))
 
-(defn filter_defs node defs
-	(filter (fn form (starts_with (#val node) (#name form))) defs))
+(defn filter_defs node defs (match node
+	({t: "pending"}     defs)
+	({state: "pending"} defs)
+	(_ (filter (fn form (starts_with (#val node) (#name form))) defs))
+))
 
 (defn get_completions node (match node
 	((is_real_active) (filter_defs node (|| (#in_scope node) [])))
@@ -180,26 +179,26 @@
 		({t: "root" els: elems}
 			{ els: (check_defs_multi elems defs) })
 
+		({t: "List" active: "t" els: [ { t: "Atom" val: name active: "t" } & (all (is_state_pending _) _) ]}
+			(match (get_form name defs)
+				({gen: items} { els: (cons (merge (head (#els node)) { in_scope: defs is_defined: "t" }) (map (make_state_pending _) items)) })
+				(_            { els: [     (merge (head (#els node)) { in_scope: defs is_defined: "f" })] })))
+
 		({t: "List" els: [{t: "Atom" val: "do"} & rest]}
 			{ els: (cons (head (#els node)) (check_defs_multi rest defs)) })
 
-		({t: "Atom" val: name}
-			(match (get_form name defs)
-				({gen: _} { in_scope: defs state: "n" })
-				(_        { in_scope: defs state: "undefined" })))
-
-		({t: "List" active: "t" els: [ { t: "Atom" val: name active: "t" } & (all (is_state_pending _) _) ]}
-			(match (get_form name defs)
-				({gen: items} { els: (cons (merge (head (#els node)) { in_scope: defs state: "n" }) (map (make_state_pending _) items)) })
-				(_            { els: [     (merge (head (#els node)) { in_scope: defs state: "undefined" })] })))
-
 		({t: "List" els: [{t: "Atom" val: "defn"} & rest]}
-			{ els: (concat (map (merge _ {state: "n"}) (init (#els node)))
+			{ els: (concat (map (merge _ {is_defined: "t"}) (init (#els node)))
 						   [(check_defs (last rest) (concat defs (map (fn el {name: (#val el) gen: []}) (init rest))))]) })
 
 		({t: "List" els: [{t: "Atom" val: "def"} {t: "Atom" val: name} body]}
-			{ els: (concat (map (merge _ {state: "n"}) (take 2 (#els node)))
+			{ els: (concat (map (merge _ {is_defined: "t"}) (take 2 (#els node)))
 						   (check_defs body defs)) })
+
+		({t: (fn t (any (== t _) ["Atom" "pending"])) val: name state: "n"}
+			(match (get_form name defs)
+				({gen: _} { in_scope: defs is_defined: "t" })
+				(_        { in_scope: defs is_defined: "f" })))
 
 		({t: "Pair" els: [key value]}
 			{ els: [key (check_defs value defs)] })
@@ -210,8 +209,6 @@
 		(_ {})
 	))
 )
-
-//TODO: difference between state undefinded, pending, n etc
 
 //special forms
 (def special_forms [
@@ -274,7 +271,7 @@
 ))
 
 (defn get_classes prim (match prim
-	({t: type, active: act state: st} [(str ["type_" type]) (str ["act_" act]) (str ["st_" st])])
+	({t: type, active: act state: st is_defined: is_def} [(str ["type_" type]) (str ["act_" act]) (str ["st_" st]) (str ["is_def_" is_def])])
 	(_ [])))
 
 (defn render_primitive prim
@@ -315,6 +312,7 @@
 
 (def special_input [
 	[8  "bs"]
+	[13 "ret"]
 	[37 "larr"]
 	[38 "uarr"]
 	[39 "rarr"]

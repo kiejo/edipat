@@ -41,6 +41,11 @@
 		acc
 		(foldl (f acc (head xs)) f (tail xs))))
 
+(defn remove_nth n xs (match [n xs]
+	([0 []]          [])
+	([0 [x & rest]] rest)
+	([i [x & rest]] (cons x (remove_nth (dec i) rest)))))
+
 (defn sum xs
 	(foldl 0 + xs))
 

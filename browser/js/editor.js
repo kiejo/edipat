@@ -5,7 +5,7 @@ return gen_type_with_els("root", [gen_pending("...")]);
 };
 function gen_type_with_val(type, value) { 
 
-return {t: type, val: value, state: "n", active: "f"};
+return {t: type, val: value, state: "n", active: "f", is_defined: "t"};
 };
 var gen_pending = (function(__partial_arg_1) { return gen_type_with_val("pending", __partial_arg_1)});
 var gen_num = (function(__partial_arg_1) { return gen_type_with_val("Num", __partial_arg_1)});
@@ -75,52 +75,6 @@ return (function() {
 					var el = el_to_match[1][0];
 					var rest = el_to_match[1].slice(1);
 					return cons(el, activate_nth(dec(i), rest));
-
-				}
-			}
-		}
-	}})();
-};
-function remove_nth(n, els) { 
-
-return (function() { 
-	var el_to_match = [n, els];
-	if (get_type(el_to_match) == 'Array') {
-		if (el_to_match.length == 2) {
-			if (0 == el_to_match[0]) {
-				if (get_type(el_to_match[1]) == 'Array') {
-					if (el_to_match[1].length == 0) {
-						return [];
-
-					}
-				}
-			}
-		}
-	}
-
-	if (get_type(el_to_match) == 'Array') {
-		if (el_to_match.length == 2) {
-			if (0 == el_to_match[0]) {
-				if (get_type(el_to_match[1]) == 'Array') {
-					if (typeof el_to_match[1][0] != 'undefined') {
-						var el = el_to_match[1][0];
-						var rest = el_to_match[1].slice(1);
-						return rest;
-
-					}
-				}
-			}
-		}
-	}
-
-	if (get_type(el_to_match) == 'Array') {
-		if (el_to_match.length == 2) {
-			var i = el_to_match[0];
-			if (get_type(el_to_match[1]) == 'Array') {
-				if (typeof el_to_match[1][0] != 'undefined') {
-					var el = el_to_match[1][0];
-					var rest = el_to_match[1].slice(1);
-					return cons(el, remove_nth(dec(i), rest));
 
 				}
 			}
@@ -274,7 +228,7 @@ return (function() {
 
 	if (get_type(el_to_match) == 'Array') {
 		if (el_to_match.length == 2) {
-			if (" " == el_to_match[0]) {
+			if ("ret" == el_to_match[0]) {
 				if (get_type(el_to_match[1]) == 'Object') {
 					if ('t' in el_to_match[1]) {
 						if (like_list(el_to_match[1].t)) {
@@ -344,6 +298,29 @@ return (function() {
 	if (get_type(el_to_match) == 'Array') {
 		if (el_to_match.length == 2) {
 			if ("rarr" == el_to_match[0]) {
+				if (get_type(el_to_match[1]) == 'Object') {
+					if ('t' in el_to_match[1]) {
+						if (like_list(el_to_match[1].t)) {
+							if ('active' in el_to_match[1]) {
+								if ("t" == el_to_match[1].active) {
+									if ('els' in el_to_match[1]) {
+										if (((function(__partial_arg_1) { return contains_active_type(["Atom", "Num", "Str", "pending", "List"], __partial_arg_1)}))(el_to_match[1].els)) {
+											return ["uarr", "rarr", "darr"];
+
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Array') {
+		if (el_to_match.length == 2) {
+			if (" " == el_to_match[0]) {
 				if (get_type(el_to_match[1]) == 'Object') {
 					if ('t' in el_to_match[1]) {
 						if (like_list(el_to_match[1].t)) {
@@ -514,22 +491,22 @@ return el_ind;}})()};
 	}
 
 	if ("[" == el_to_match) {
-		return activate(gen_arr([activate(gen_pending("el"))]));
+		return activate(gen_arr([activate(gen_pending("..."))]));
 
 	}
 
 	if ("(" == el_to_match) {
-		return activate(gen_list([activate(gen_pending("el"))]));
+		return activate(gen_list([activate(gen_pending("..."))]));
 
 	}
 
 	if ("{" == el_to_match) {
-		return activate(gen_obj([activate(gen_pair([activate(gen_atom("key")), gen_pending("el")]))]));
+		return activate(gen_obj([activate(gen_pair([make_state_pending(activate(gen_atom("key"))), gen_pending("...")]))]));
 
 	}
 
 	if (":" == el_to_match) {
-		return activate(gen_pair([activate(gen_atom("key")), gen_pending("el")]));
+		return activate(gen_pair([activate(gen_atom("key")), gen_pending("...")]));
 
 	}
 
@@ -659,7 +636,10 @@ return el_ind;}})()};
 	}
 
 	if ("bs" == el_to_match) {
-		return {val: init(value)};
+		return (function() { 
+if ((function(a,b) { return a == b; })(init(value).length, 0)) { 
+return activate(gen_pending("..."));} else { 
+return {val: init(value)};}})();
 
 	}
 
@@ -795,10 +775,31 @@ return filter((function(__partial_arg_1) { return (function(a,b) { return a != b
 };
 function filter_defs(node, defs) { 
 
-return filter(function (form) { 
+return (function() { 
+	var el_to_match = node;
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
+			if ("pending" == el_to_match.t) {
+				return defs;
+
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Object') {
+		if ('state' in el_to_match) {
+			if ("pending" == el_to_match.state) {
+				return defs;
+
+			}
+		}
+	}
+
+	return filter(function (form) { 
 
 return starts_with(node.val, form.name);
 }, defs);
+})();
 };
 function get_completions(node) { 
 
@@ -857,54 +858,6 @@ return merge(node, (function() {
 	if (get_type(el_to_match) == 'Object') {
 		if ('t' in el_to_match) {
 			if ("List" == el_to_match.t) {
-				if ('els' in el_to_match) {
-					if (get_type(el_to_match.els) == 'Array') {
-						if (typeof el_to_match.els[0] != 'undefined') {
-							if (get_type(el_to_match.els[0]) == 'Object') {
-								if ('t' in el_to_match.els[0]) {
-									if ("Atom" == el_to_match.els[0].t) {
-										if ('val' in el_to_match.els[0]) {
-											if ("do" == el_to_match.els[0].val) {
-												var rest = el_to_match.els.slice(1);
-												return {els: cons(head(node.els), check_defs_multi(rest, defs))};
-
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	if (get_type(el_to_match) == 'Object') {
-		if ('t' in el_to_match) {
-			if ("Atom" == el_to_match.t) {
-				if ('val' in el_to_match) {
-					var name = el_to_match.val;
-					return (function() { 
-	var el_to_match = get_form(name, defs);
-	if (get_type(el_to_match) == 'Object') {
-		if ('gen' in el_to_match) {
-			return {in_scope: defs, state: "n"};
-
-		}
-	}
-
-	return {in_scope: defs, state: "undefined"};
-})();
-
-				}
-			}
-		}
-	}
-
-	if (get_type(el_to_match) == 'Object') {
-		if ('t' in el_to_match) {
-			if ("List" == el_to_match.t) {
 				if ('active' in el_to_match) {
 					if ("t" == el_to_match.active) {
 						if ('els' in el_to_match) {
@@ -923,12 +876,12 @@ return merge(node, (function() {
 	if (get_type(el_to_match) == 'Object') {
 		if ('gen' in el_to_match) {
 			var items = el_to_match.gen;
-			return {els: cons(merge(head(node.els), {in_scope: defs, state: "n"}), map((function(__partial_arg_0) { return make_state_pending(__partial_arg_0)}), items))};
+			return {els: cons(merge(head(node.els), {in_scope: defs, is_defined: "t"}), map((function(__partial_arg_0) { return make_state_pending(__partial_arg_0)}), items))};
 
 		}
 	}
 
-	return {els: [merge(head(node.els), {in_scope: defs, state: "undefined"})]};
+	return {els: [merge(head(node.els), {in_scope: defs, is_defined: "f"})]};
 })();
 
 															}
@@ -957,9 +910,35 @@ return merge(node, (function() {
 								if ('t' in el_to_match.els[0]) {
 									if ("Atom" == el_to_match.els[0].t) {
 										if ('val' in el_to_match.els[0]) {
+											if ("do" == el_to_match.els[0].val) {
+												var rest = el_to_match.els.slice(1);
+												return {els: cons(head(node.els), check_defs_multi(rest, defs))};
+
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
+			if ("List" == el_to_match.t) {
+				if ('els' in el_to_match) {
+					if (get_type(el_to_match.els) == 'Array') {
+						if (typeof el_to_match.els[0] != 'undefined') {
+							if (get_type(el_to_match.els[0]) == 'Object') {
+								if ('t' in el_to_match.els[0]) {
+									if ("Atom" == el_to_match.els[0].t) {
+										if ('val' in el_to_match.els[0]) {
 											if ("defn" == el_to_match.els[0].val) {
 												var rest = el_to_match.els.slice(1);
-												return {els: concat(map((function(__partial_arg_0) { return merge(__partial_arg_0, {state: "n"})}), init(node.els)), [check_defs(last(rest), concat(defs, map(function (el) { 
+												return {els: concat(map((function(__partial_arg_0) { return merge(__partial_arg_0, {is_defined: "t"})}), init(node.els)), [check_defs(last(rest), concat(defs, map(function (el) { 
 
 return {name: el.val, gen: []};
 }, init(rest))))])};
@@ -993,7 +972,7 @@ return {name: el.val, gen: []};
 															if ('val' in el_to_match.els[1]) {
 																var name = el_to_match.els[1].val;
 																var body = el_to_match.els[2];
-																return {els: concat(map((function(__partial_arg_0) { return merge(__partial_arg_0, {state: "n"})}), take(2, node.els)), check_defs(body, defs))};
+																return {els: concat(map((function(__partial_arg_0) { return merge(__partial_arg_0, {is_defined: "t"})}), take(2, node.els)), check_defs(body, defs))};
 
 															}
 														}
@@ -1004,6 +983,35 @@ return {name: el.val, gen: []};
 									}
 								}
 							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if (get_type(el_to_match) == 'Object') {
+		if ('t' in el_to_match) {
+			if ((function (t) { 
+
+return any((function(__partial_arg_1) { return (function(a,b) { return a == b; })(t, __partial_arg_1)}), ["Atom", "pending"]);
+})(el_to_match.t)) {
+				if ('val' in el_to_match) {
+					var name = el_to_match.val;
+					if ('state' in el_to_match) {
+						if ("n" == el_to_match.state) {
+							return (function() { 
+	var el_to_match = get_form(name, defs);
+	if (get_type(el_to_match) == 'Object') {
+		if ('gen' in el_to_match) {
+			return {in_scope: defs, is_defined: "t"};
+
+		}
+	}
+
+	return {in_scope: defs, is_defined: "f"};
+})();
+
 						}
 					}
 				}
@@ -1043,7 +1051,6 @@ return {name: el.val, gen: []};
 	return {};
 })());
 };
-;
 ;
 var special_forms = [{name: "def", gen: [gen_atom("name"), gen_pending("value")]}, {name: "set", gen: [gen_atom("name"), gen_pending("value")]}, {name: "defn", gen: [gen_atom("name"), gen_atom("arg1"), gen_pending("body")]}, {name: "fn", gen: [gen_atom("arg1"), gen_pending("body")]}, {name: "if", gen: [gen_pending("cond"), gen_pending("else"), gen_pending("else")]}, {name: "nth", gen: [gen_pending("index"), gen_pending("array")]}, {name: "do", gen: [gen_list([gen_pending("...")])]}, {name: "match", gen: [gen_pending("value"), gen_list([gen_pending("patt"), gen_pending("expr")])]}];
 var built_in_binops = map(function (op) { 
@@ -1191,8 +1198,11 @@ return (function() {
 				var act = el_to_match.active;
 				if ('state' in el_to_match) {
 					var st = el_to_match.state;
-					return [str(["type_", type]), str(["act_", act]), str(["st_", st])];
+					if ('is_defined' in el_to_match) {
+						var is_def = el_to_match.is_defined;
+						return [str(["type_", type]), str(["act_", act]), str(["st_", st]), str(["is_def_", is_def])];
 
+					}
 				}
 			}
 		}
@@ -1260,7 +1270,7 @@ return (function() {
 }, special_input));
 };
 ;
-var special_input = [[8, "bs"], [37, "larr"], [38, "uarr"], [39, "rarr"], [9, "tab"], [40, "darr"], [46, "del"]];
+var special_input = [[8, "bs"], [13, "ret"], [37, "larr"], [38, "uarr"], [39, "rarr"], [9, "tab"], [40, "darr"], [46, "del"]];
 function kd_keycode_to_s(pairs, kc) { 
 
 return (function() { 
