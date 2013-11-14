@@ -478,7 +478,11 @@ return el_ind;}})()};
 			if ("pending" == el_to_match.t) {
 				if ('active' in el_to_match) {
 					if ("t" == el_to_match.active) {
-						return (function() { 
+						if ('val' in el_to_match) {
+							var value = el_to_match.val;
+							if ('in_scope' in el_to_match) {
+								var defs = el_to_match.in_scope;
+								return (function() { 
 	var el_to_match = input;
 	if ("uarr" == el_to_match) {
 		return {active: "f"};
@@ -510,6 +514,14 @@ return el_ind;}})()};
 
 	}
 
+	if ("tab" == el_to_match) {
+		return activate(gen_atom((function() { 
+if (empty(defs)) { 
+return value;} else { 
+return head(get_completions(node, defs)).name;}})()));
+
+	}
+
 	if (is_num(el_to_match)) {
 		return activate(gen_num(input));
 
@@ -520,6 +532,8 @@ return el_ind;}})()};
 
 	}})();
 
+							}
+						}
 					}
 				}
 			}

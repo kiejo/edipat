@@ -92,7 +92,7 @@
 				(" "    { els: (insert_at (inc el_ind) (activate (gen_pending "...")) (deactivate_all elems)) sel_el: (inc el_ind) })
 				(_  {})))
 
-		({t: "pending" active: "t"}
+		({t: "pending" active: "t" val: value in_scope: defs}
 			(match input
 				("uarr"    { active: "f" })
 				("'"       (activate (gen_str "")))
@@ -100,6 +100,7 @@
 				("("       (activate (gen_list [(activate (gen_pending "..."))])))
 				("{"       (activate (gen_obj  [(activate (gen_pair [(make_state_pending (activate (gen_atom "key"))) (gen_pending "...")]))])))
 				(":"       (activate (gen_pair [(activate (gen_atom "key")) (gen_pending "...")])))
+				("tab"     (activate (gen_atom (if (empty defs) value (#name (head (get_completions node defs)))))))
 				((is_num)  (activate (gen_num input)))
 				((is_atom) (activate (gen_atom input)))))
 
