@@ -2,14 +2,13 @@
 
 (defn gen_root (gen_type_with_els "root" [(gen_pending "...")]))
 
-(defn gen_type_with_val type value { t: type val: value state: "n" active: "f" is_defined: "t" })
+(defn gen_type_with_val type value { t: type val: value state: "n" active: "f" is_defined: "t" in_scope: [] })
+(def gen_pending (gen_type_with_val "pending" _))
+(def gen_atom    (gen_type_with_val "Atom" _))
 (def gen_num     (gen_type_with_val "Num" _))
 (def gen_str     (gen_type_with_val "Str" _))
 
-(defn gen_pending value (merge (gen_type_with_val "pending" value) { in_scope: [] }))
-(defn gen_atom value (merge (gen_type_with_val "Atom" value) { in_scope: [] }))
-
-(defn gen_type_with_els type els { t: type els: els sel_el: 0 state: "n" active: "f" })
+(defn gen_type_with_els type els { t: type els: els sel_el: 0 state: "n" active: "f" in_scope: [] })
 (def gen_list (gen_type_with_els "List" _))
 (def gen_arr  (gen_type_with_els "Arr" _))
 (def gen_obj  (gen_type_with_els "Obj" _))
@@ -197,10 +196,10 @@
 			{ els: (concat (map (merge _ {is_defined: "t"}) (take 2 (#els node)))
 						   (check_defs body defs)) })
 
-		({t: (fn t (any (== t _) ["Atom" "pending"])) val: name state: "n"}
+		({t: (fn t (any (== t _) ["Atom" "pending"])) active: act val: name state: "n"}
 			(match (get_form name defs)
-				({gen: _} { in_scope: defs is_defined: "t" })
-				(_        { in_scope: defs is_defined: "f" })))
+				({gen: _} { in_scope: (if (== act "t") defs []) is_defined: "t" })
+				(_        { in_scope: (if (== act "t") defs []) is_defined: "f" })))
 
 		({t: "Pair" els: [key value]}
 			{ els: [key (check_defs value defs)] })

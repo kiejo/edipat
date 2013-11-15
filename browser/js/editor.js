@@ -5,21 +5,15 @@ return gen_type_with_els("root", [gen_pending("...")]);
 };
 function gen_type_with_val(type, value) { 
 
-return {t: type, val: value, state: "n", active: "f", is_defined: "t"};
+return {t: type, val: value, state: "n", active: "f", is_defined: "t", in_scope: []};
 };
+var gen_pending = (function(__partial_arg_1) { return gen_type_with_val("pending", __partial_arg_1)});
+var gen_atom = (function(__partial_arg_1) { return gen_type_with_val("Atom", __partial_arg_1)});
 var gen_num = (function(__partial_arg_1) { return gen_type_with_val("Num", __partial_arg_1)});
 var gen_str = (function(__partial_arg_1) { return gen_type_with_val("Str", __partial_arg_1)});
-function gen_pending(value) { 
-
-return merge(gen_type_with_val("pending", value), {in_scope: []});
-};
-function gen_atom(value) { 
-
-return merge(gen_type_with_val("Atom", value), {in_scope: []});
-};
 function gen_type_with_els(type, els) { 
 
-return {t: type, els: els, sel_el: 0, state: "n", active: "f"};
+return {t: type, els: els, sel_el: 0, state: "n", active: "f", in_scope: []};
 };
 var gen_list = (function(__partial_arg_1) { return gen_type_with_els("List", __partial_arg_1)});
 var gen_arr = (function(__partial_arg_1) { return gen_type_with_els("Arr", __partial_arg_1)});
@@ -1043,22 +1037,31 @@ return {name: el.val, gen: []};
 
 return any((function(__partial_arg_1) { return (function(a,b) { return a == b; })(t, __partial_arg_1)}), ["Atom", "pending"]);
 })(el_to_match.t)) {
-				if ('val' in el_to_match) {
-					var name = el_to_match.val;
-					if ('state' in el_to_match) {
-						if ("n" == el_to_match.state) {
-							return (function() { 
+				if ('active' in el_to_match) {
+					var act = el_to_match.active;
+					if ('val' in el_to_match) {
+						var name = el_to_match.val;
+						if ('state' in el_to_match) {
+							if ("n" == el_to_match.state) {
+								return (function() { 
 	var el_to_match = get_form(name, defs);
 	if (get_type(el_to_match) == 'Object') {
 		if ('gen' in el_to_match) {
-			return {in_scope: defs, is_defined: "t"};
+			return {in_scope: (function() { 
+if ((function(a,b) { return a == b; })(act, "t")) { 
+return defs;} else { 
+return [];}})(), is_defined: "t"};
 
 		}
 	}
 
-	return {in_scope: defs, is_defined: "f"};
+	return {in_scope: (function() { 
+if ((function(a,b) { return a == b; })(act, "t")) { 
+return defs;} else { 
+return [];}})(), is_defined: "f"};
 })();
 
+							}
 						}
 					}
 				}
