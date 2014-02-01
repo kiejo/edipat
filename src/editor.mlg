@@ -283,10 +283,17 @@
 
 //view and user interaction
 
+(defn hide_completions node
+	(merge node (match node
+		({els: elems} {in_scope: "hidden", els: (map hide_completions elems)})
+		(_            {in_scope: "hidden"})
+	))
+)
+
 (def root_node (activate (gen_root)))
 
 (defn update_view node (do
-	(.text ($ "#src-tree") (.parse jsDump node))
+	(.text ($ "#src-tree") (.parse jsDump (hide_completions node)))
 	(.html ($ "#src-text") (render node))
 ))
 

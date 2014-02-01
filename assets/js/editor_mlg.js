@@ -1270,11 +1270,26 @@ function wrap_span(cont, cl) {
 return str(["<span class='", cl, "'>", cont, "</span>"]);
 };
 ;
+function hide_completions(node) { 
+
+return merge(node, (function() { 
+	var el_to_match = node;
+	if (get_type(el_to_match) == 'Object') {
+		if ('els' in el_to_match) {
+			var elems = el_to_match.els;
+			return {in_scope: "hidden", els: map(hide_completions, elems)};
+
+		}
+	}
+
+	return {in_scope: "hidden"};
+})());
+};
 var root_node = activate(gen_root());
 function update_view(node) { 
 
 return (function() { 
-$("#src-tree").text(jsDump.parse(node));
+$("#src-tree").text(jsDump.parse(hide_completions(node)));
 return $("#src-text").html(render(node));
 })();
 };
