@@ -1,0 +1,18 @@
+.title {
+	text-align: left;
+	margin-bottom: 3px;
+}
+
+.src-text {
+	text-align: left;
+	color: black;
+	min-height: 550px;
+	width: 100%;
+}
+
+.compiler-output {
+	text-align: left;
+	color: black;
+	min-height: 550px;
+	width: 100%;
+}

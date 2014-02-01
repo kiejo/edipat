@@ -16,17 +16,17 @@ function comp_function(els, name) {
 		fn_exprs = _.last(els).elements;
 	}
 
-	var fn_stmts = _.map(_.initial(fn_exprs), compile);
+	var fn_stmts = _.map(_.initial(fn_exprs), comp_expr);
 
-	return "function " + name + "(" + args.join(", ") + ") { \n" + fn_stmts.join("\n") + "\nreturn " + compile(_.last(fn_exprs)) + ";\n}";
+	return "function " + name + "(" + args.join(", ") + ") { \n" + fn_stmts.join("\n") + "\nreturn " + comp_expr(_.last(fn_exprs)) + ";\n}";
 }
 
 function comp_if(els) {
 	return "(function() { \n" + 
-			       		"if (" + compile(els[1]) + ") { \n" +
-			       			"return " + compile(els[2]) + ";" +
+			       		"if (" + comp_expr(els[1]) + ") { \n" +
+			       			"return " + comp_expr(els[2]) + ";" +
 			       		"} else { \n" +
-			       			"return " + compile(els[3]) + ";" +
+			       			"return " + comp_expr(els[3]) + ";" +
 			       		"}" +
 			       	"})()";
 }
@@ -36,7 +36,7 @@ function comp_match(els) {
 	var patt_expr_pairs = _.tail(els);
 
 	var el_var_name = 'el_to_match';
-	var el_declaration = [{type: 'Decl', name: el_var_name, value: compile(el)}]; //evaluate expression to match
+	var el_declaration = [{type: 'Decl', name: el_var_name, value: comp_expr(el)}]; //evaluate expression to match
 
 	var comp_patt_matchers = [];
 	for (var i = 0; i < patt_expr_pairs.length; i++) {
@@ -52,7 +52,7 @@ function comp_match(els) {
 
 function comp_patt_expr(patt, expr, el_var_name) {
 	var patt_infos = gen_patt_info(patt, el_var_name, '');
-	patt_infos.push({type: 'Expr', expr: compile(expr)});
+	patt_infos.push({type: 'Expr', expr: comp_expr(expr)});
 
 	return comp_patt_infos(patt_infos, 1);
 }
@@ -82,13 +82,13 @@ function gen_patt_info(patt, el, el_accessor) {
 			} else {
 				return [{type: 'Decl', name: patt.name, value: comp_el}];
 			} 
-		case "Number": return [{type: 'Cond', cond: compile(patt) + " == " + comp_el}];
-		case "String": return [{type: 'Cond', cond: compile(patt) + " == " + comp_el}];
+		case "Number": return [{type: 'Cond', cond: comp_expr(patt) + " == " + comp_el}];
+		case "String": return [{type: 'Cond', cond: comp_expr(patt) + " == " + comp_el}];
 		case "List":
 			if (patt.elements.length > 1) {
-				return [{type: 'Cond', cond: compile({ type: "List", elements: [patt, { type: "Atom", name: comp_el }] }) }];
+				return [{type: 'Cond', cond: comp_expr({ type: "List", elements: [patt, { type: "Atom", name: comp_el }] }) }];
 			} else {
-				return [{type: 'Cond', cond: compile({ type: "List", elements: patt.elements.concat({ type: "Atom", name: comp_el }) }) }];
+				return [{type: 'Cond', cond: comp_expr({ type: "List", elements: patt.elements.concat({ type: "Atom", name: comp_el }) }) }];
 			}
 		case "Array":
 			var res = [{type: 'Cond', cond: 'get_type(' + comp_el + ") == 'Array'"}];
@@ -131,11 +131,11 @@ function comp_list(els) {
 
 		if (op == "def")
 		{
-			return "var " + els[1].name + " = " + compile(els[2])
+			return "var " + els[1].name + " = " + comp_expr(els[2])
 		}
 		if (op == "set")
 		{
-			return els[1].name + " = " + compile(els[2])
+			return els[1].name + " = " + comp_expr(els[2])
 		}
 		else if (op == "fn")
 		{
@@ -143,7 +143,7 @@ function comp_list(els) {
 		}
 		else if (op == "defn")
 		{
-			return comp_function(_.tail(_.tail(els)), compile(els[1]));	
+			return comp_function(_.tail(_.tail(els)), comp_expr(els[1]));	
 		}
 		else if (op == "if")
 		{
@@ -158,25 +158,25 @@ function comp_list(els) {
 			if (els.length == 1) {
 				return "(function(a) { return a." + op.substr(1) + ";})"
 			} else {
-				return compile(els[1]) + "." + op.substr(1);
+				return comp_expr(els[1]) + "." + op.substr(1);
 			}
 		}
 		else if (op.indexOf('.') == 0) //method invocation on object
 		{
-			var fn_atom = { type: "Atom", name: compile(els[1]) + '.' + op.substr(1) };
+			var fn_atom = { type: "Atom", name: comp_expr(els[1]) + '.' + op.substr(1) };
 			var fn_call = { type: "List", elements: [fn_atom].concat(_.drop(els, 2)) };
 
-			return compile(fn_call);
+			return comp_expr(fn_call);
 			
 		}
 		else if (op == "nth") //array access
 		{
-			return compile(els[2]) + "[" + compile(els[1]) + "]";
+			return comp_expr(els[2]) + "[" + comp_expr(els[1]) + "]";
 		}
 		else if (op == "do") {
 			//treat as sequential operations, return last statement
 			return "(function() { \n" + 
-						_.map(_.initial(_.tail(els)), compile).join(";\n") + ";\n" + "return " + compile(_.last(els)) + ";\n" +
+						_.map(_.initial(_.tail(els)), comp_expr).join(";\n") + ";\n" + "return " + comp_expr(_.last(els)) + ";\n" +
 		       		"})()"
 		}
 		else //treat as function call or partial function call
@@ -184,10 +184,10 @@ function comp_list(els) {
 			var partial_arg_prefix = '__partial_arg_';
 
 			function compile_arg(arg, i) {
-				return arg.type == 'Atom' && arg.name == '_' ? partial_arg_prefix + i : compile(arg);
+				return arg.type == 'Atom' && arg.name == '_' ? partial_arg_prefix + i : comp_expr(arg);
 			}
 
-			var fn_name = els[0].type == 'List' ? '(' + compile(els[0]) + ')' : compile(els[0]);
+			var fn_name = els[0].type == 'List' ? '(' + comp_expr(els[0]) + ')' : comp_expr(els[0]);
 			var compiled_args = _.map(_.tail(els), compile_arg);
 			var compiled_fn_call = fn_name + "(" + compiled_args.join(", ") + ")";
 
@@ -206,10 +206,10 @@ function comp_list(els) {
 	throw "expected atom or list. Got " + els[0].type + " instead.";
 }
 
-function compile(expr) {
+function comp_expr(expr) {
 	switch(expr.type) {
 		case 'Program':
-			return _.map(expr.body, compile).join(";\n") + ";"
+			return _.map(expr.body, comp_expr).join(";\n") + ";"
 		case 'List':
 			return comp_list(expr.elements);
 		case 'Number':
@@ -225,8 +225,35 @@ function compile(expr) {
 		case 'Comment':
 			return "";
 		case 'Array':
-			return "[" + _.map(expr.elements, compile).join(", ") + "]";
+			return "[" + _.map(expr.elements, comp_expr).join(", ") + "]";
 		case 'Object':
-			return "{" + _.map(expr.elements, function(pair) { return pair.key + ": " + compile(pair.value); }).join(", ") + "}";
+			return "{" + _.map(expr.elements, function(pair) { return pair.key + ": " + comp_expr(pair.value); }).join(", ") + "}";
+	}
+}
+
+function buildParseErrorMessage(e) {
+	return e.line !== undefined && e.column !== undefined
+	      ? "Line " + e.line + ", column " + e.column + ":\n" + e.message
+	      : e.message;
+}
+
+function compile(grammar, source) {
+	try {
+		var parser = PEG.buildParser(grammar);
+	} catch (e) {
+		return "parser initialization failed: " + e.message;
+	}
+
+	try {
+		var parsed = parser.parse(source);
+	} catch(e) {
+		return "parse error: " + buildParseErrorMessage(e);
+	}
+
+	try {
+		var compiled = comp_expr(parsed);
+		return compiled;
+	} catch(e) {
+		return "compilation error: " + e.message;
 	}
 }

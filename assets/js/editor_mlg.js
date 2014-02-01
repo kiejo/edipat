@@ -1274,8 +1274,8 @@ var root_node = activate(gen_root());
 function update_view(node) { 
 
 return (function() { 
-$("#ast").text(jsDump.parse(node));
-return $("#rendered").html(render(node));
+$("#src-tree").text(jsDump.parse(node));
+return $("#src-text").html(render(node));
 })();
 };
 function update_view_compl(completions) { 
@@ -1378,10 +1378,10 @@ $(document).ready(function () {
 return (function() { 
 update(root_node, "darr");
 ;
-$("#rendered").keydown((function(__partial_arg_1) { return handle_keydown((function(__partial_arg_1) { return update(root_node, __partial_arg_1)}), __partial_arg_1)}));
+$("#src-text").keydown((function(__partial_arg_1) { return handle_keydown((function(__partial_arg_1) { return update(root_node, __partial_arg_1)}), __partial_arg_1)}));
 ;
-$("#rendered").keypress((function(__partial_arg_1) { return handle_keypress((function(__partial_arg_1) { return update(root_node, __partial_arg_1)}), __partial_arg_1)}));
+$("#src-text").keypress((function(__partial_arg_1) { return handle_keypress((function(__partial_arg_1) { return update(root_node, __partial_arg_1)}), __partial_arg_1)}));
 ;
-return $("#rendered").focus();
+return $("#src-text").focus();
 })();
 });

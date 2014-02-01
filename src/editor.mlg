@@ -286,8 +286,8 @@
 (def root_node (activate (gen_root)))
 
 (defn update_view node (do
-	(.text ($ "#ast") (.parse jsDump node))
-	(.html ($ "#rendered") (render node))
+	(.text ($ "#src-tree") (.parse jsDump node))
+	(.html ($ "#src-text") (render node))
 ))
 
 (defn update_view_compl completions (do
@@ -345,9 +345,9 @@
 
 	(update root_node "darr") //activate first child
 
-	(.keydown  ($ "#rendered") (handle_keydown  (update root_node _) _)) //triggered for every key
-	(.keypress ($ "#rendered") (handle_keypress (update root_node _) _)) //only guaranteed for characters
+	(.keydown  ($ "#src-text") (handle_keydown  (update root_node _) _)) //triggered for every key
+	(.keypress ($ "#src-text") (handle_keypress (update root_node _) _)) //only guaranteed for characters
 
-	(.focus ($ "#rendered"))
+	(.focus ($ "#src-text"))
 
 )))

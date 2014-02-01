@@ -1,0 +1,57 @@
+.title {
+	text-align: left;
+	margin-bottom: 3px;
+}
+
+.src-text {
+	text-align: left;
+	background-color: #C7C7C7;
+	min-height: 550px;
+	padding: 2px 5px;
+}
+
+.completions {
+	text-align: left;
+	color: black;
+	background-color: #787878;
+	min-height: 24px;
+	padding: 2px 5px;
+}
+
+.src-tree {
+	text-align: left;
+	color: black;
+	background-color: #787878;
+	min-height: 574px;
+	width: 100%;
+}
+
+
+
+/* tree rendering */
+
+.src-text .st_pending {
+	opacity: 0.5;
+}
+
+.src-text .is_def_f {
+	border-bottom: 1px solid red;
+}
+
+.src-text .act_t {
+	background-color: rgba(59, 100, 255, 0.5);
+	border-radius: 4px;
+	opacity: 1;
+}
+
+.src-text .type_Str {
+	color: #542E02;
+}
+
+.src-text .type_Num {
+	color: #7D2300;
+}
+
+.src-text .type_Atom {
+	color: black;
+}
