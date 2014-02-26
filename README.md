@@ -9,8 +9,15 @@ Try it out online: http://kiejo.github.io/edipat
 
 Language
 ---
-Dialact of Lisp with pattern matching supportcompiles to JavaScript. The compiler is written in JavaScript and there's no macro support yet.  
-I created the language mainly for fun and to see what works well with structural editing.
+* dialect of Lisp with pattern matching support
+* compiles to JavaScript
+* compiler written in JavaScript.
+* no macros yet
+
+Why a new language?
+* for fun and learning
+* to be able to test what language constructs work well with structural editing
+* haven't seen any Lisp dialect with native pattern matching
 
 License
 ----
