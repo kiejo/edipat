@@ -9,6 +9,7 @@ function get_type(el) {
 	return re.exec(toClass.call(el))[1];
 }
 
+// used by editor
 // returns merge result of two objects, supports nested objects
 function merge(obj1, obj2) {
     var result = {};
